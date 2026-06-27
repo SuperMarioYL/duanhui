@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 360" width="880" height="360"
+     font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif"
+     role="img" aria-label="Architecture: article to segment to placement plan to style-lock to render to export bundle">
+  <defs>
+    <marker id="ah-d" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#5A5A66"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="880" height="360" fill="#1D1D1F"/>
+
+  <g stroke="#3A3A44" stroke-width="1.5" fill="none">
+    <line x1="156" y1="92" x2="196" y2="92" marker-end="url(#ah-d)"/>
+    <line x1="352" y1="92" x2="392" y2="92" marker-end="url(#ah-d)"/>
+    <line x1="548" y1="92" x2="588" y2="92" marker-end="url(#ah-d)"/>
+    <line x1="686" y1="124" x2="686" y2="176" marker-end="url(#ah-d)"/>
+    <line x1="588" y1="208" x2="548" y2="208" marker-end="url(#ah-d)"/>
+    <line x1="352" y1="208" x2="312" y2="208" marker-end="url(#ah-d)"/>
+    <line x1="470" y1="296" x2="470" y2="124" stroke-dasharray="4 4" marker-end="url(#ah-d)"/>
+    <line x1="686" y1="296" x2="686" y2="240" stroke-dasharray="4 4" marker-end="url(#ah-d)"/>
+  </g>
+
+  <g>
+    <rect x="20"  y="60" width="136" height="64" rx="15" fill="#4DA3FF" fill-opacity="0.16" stroke="#4DA3FF" stroke-width="1.5"/>
+    <text x="88"  y="88"  text-anchor="middle" font-size="14" font-weight="600" fill="#9CC8FF">Article</text>
+    <text x="88"  y="108" text-anchor="middle" font-size="11" fill="#A1A1A8">Markdown / text</text>
+
+    <rect x="216" y="60" width="136" height="64" rx="15" fill="#4DA3FF" fill-opacity="0.16" stroke="#4DA3FF" stroke-width="1.5"/>
+    <text x="284" y="88"  text-anchor="middle" font-size="14" font-weight="600" fill="#9CC8FF">segment</text>
+    <text x="284" y="108" text-anchor="middle" font-size="11" fill="#A1A1A8">role-tagged paras</text>
+
+    <rect x="412" y="60" width="136" height="64" rx="15" fill="#8985FF" fill-opacity="0.16" stroke="#8985FF" stroke-width="1.5"/>
+    <text x="480" y="88"  text-anchor="middle" font-size="14" font-weight="600" fill="#BCB9FF">place (LLM)</text>
+    <text x="480" y="108" text-anchor="middle" font-size="11" fill="#A1A1A8">where / what</text>
+
+    <rect x="608" y="60" width="156" height="64" rx="15" fill="#8985FF" fill-opacity="0.16" stroke="#8985FF" stroke-width="1.5"/>
+    <text x="686" y="88"  text-anchor="middle" font-size="14" font-weight="600" fill="#BCB9FF">style-lock</text>
+    <text x="686" y="108" text-anchor="middle" font-size="11" fill="#A1A1A8">preamble + seed</text>
+  </g>
+
+  <g>
+    <rect x="608" y="176" width="156" height="64" rx="15" fill="#2DC79A" fill-opacity="0.16" stroke="#2DC79A" stroke-width="1.5"/>
+    <text x="686" y="204" text-anchor="middle" font-size="14" font-weight="600" fill="#7FE0C4">render (image)</text>
+    <text x="686" y="224" text-anchor="middle" font-size="11" fill="#A1A1A8">consistent PNG batch</text>
+
+    <rect x="412" y="176" width="136" height="64" rx="15" fill="#2DC79A" fill-opacity="0.16" stroke="#2DC79A" stroke-width="1.5"/>
+    <text x="480" y="204" text-anchor="middle" font-size="14" font-weight="600" fill="#7FE0C4">export</text>
+    <text x="480" y="224" text-anchor="middle" font-size="11" fill="#A1A1A8">map.json + annotated.md</text>
+
+    <rect x="176" y="176" width="136" height="64" rx="15" fill="#4DA3FF" fill-opacity="0.16" stroke="#4DA3FF" stroke-width="1.5"/>
+    <text x="244" y="200" text-anchor="middle" font-size="14" font-weight="600" fill="#9CC8FF">out/ bundle</text>
+    <text x="244" y="220" text-anchor="middle" font-size="11" fill="#A1A1A8">drop into editor</text>
+  </g>
+
+  <g>
+    <rect x="392" y="296" width="156" height="48" rx="14" fill="#A1A1A8" fill-opacity="0.12" stroke="#A1A1A8" stroke-width="1.5"/>
+    <text x="470" y="318" text-anchor="middle" font-size="12.5" font-weight="600" fill="#C9C9D0">config</text>
+    <text x="470" y="335" text-anchor="middle" font-size="10.5" fill="#A1A1A8">backends / keys / mock</text>
+
+    <rect x="608" y="296" width="156" height="48" rx="14" fill="#A1A1A8" fill-opacity="0.12" stroke="#A1A1A8" stroke-width="1.5"/>
+    <text x="686" y="318" text-anchor="middle" font-size="12.5" font-weight="600" fill="#C9C9D0">guaidan.yaml</text>
+    <text x="686" y="335" text-anchor="middle" font-size="10.5" fill="#A1A1A8">the one locked style pack</text>
+  </g>
+
+  <text x="20" y="30" font-size="13" font-weight="600" fill="#A1A1A8">One process · no servers · the whole pipeline runs keyless on mock backends</text>
+</svg>

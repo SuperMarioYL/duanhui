@@ -1,0 +1,80 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "duanhui"
+version = "0.1.0"
+description = "段绘（DuanHui）— 把整篇中文文章按段落语义批量配上同风格白底怪诞手绘插图的命令行工具。Batch-illustrate a whole Chinese article in one locked native style."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { file = "LICENSE" }
+authors = [{ name = "SuperMarioYL" }]
+keywords = [
+    "illustration",
+    "chinese-content",
+    "creator-tools",
+    "text-to-image",
+    "cli",
+    "skill",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: Chinese (Simplified)",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Graphics",
+    "Topic :: Text Processing :: Markup :: Markdown",
+]
+dependencies = [
+    "typer>=0.12,<0.13",
+    # typer 0.12.x targets Click's pre-8.2 parameter API; Click 8.2 reworked
+    # how flag/bool options are parsed, which breaks typer 0.12's bool flags
+    # (every flag resolves to None). Pin Click below 8.2 so the locked typer
+    # version behaves correctly.
+    "click>=8.0,<8.2",
+    "pydantic>=2.7,<3",
+    "jinja2>=3.1,<4",
+    "httpx>=0.27,<0.28",
+    "pyyaml>=6,<7",
+    "rich>=13,<14",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8,<9",
+]
+
+[project.urls]
+Homepage = "https://github.com/SuperMarioYL/duanhui"
+Repository = "https://github.com/SuperMarioYL/duanhui"
+Issues = "https://github.com/SuperMarioYL/duanhui/issues"
+Changelog = "https://github.com/SuperMarioYL/duanhui/blob/main/CHANGELOG.md"
+
+[project.scripts]
+duanhui = "duanhui.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["duanhui"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"styles" = "duanhui/styles"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/duanhui",
+    "/styles",
+    "/examples",
+    "/tests",
+    "/README.md",
+    "/README.en.md",
+    "/CHANGELOG.md",
+    "/LICENSE",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

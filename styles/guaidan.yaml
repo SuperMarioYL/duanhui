@@ -1,0 +1,57 @@
+# 段绘 — 锁定风格包：怪诞手绘（guaidan）
+#
+# The ONE locked native aesthetic that ships with v0.1. Runtime multi-style
+# switching is explicitly out of scope; the pack *format* is pluggable but only
+# this pack ships. Every illustration in a single article run injects the same
+# `style_preamble` plus a shared `consistency_seed`, which is the concrete
+# cross-image consistency mechanism described in the MVP plan §2.
+#
+# This file is the StyleLock primitive:
+#   { pack_id, palette[红/橙/蓝 accents on 白底], aspect:16:9, motif:怪诞手绘,
+#     consistency_seed }
+#
+# m1 does not render anything; the placement stage only needs the segments and
+# an LLM backend. This pack is consumed by the style-lock + render stages (m2).
+
+pack_id: guaidan
+display_name: 怪诞手绘 · 白底批注
+description: >-
+  中文知识科普图文的本土审美：纯白背景、黑色细笔手绘线条、刻意的怪诞/拙趣造型，
+  辅以少量红、橙、蓝批注式色块与圈点，16:9 横版，留白充足，像作者随手画在白纸上的解说图。
+
+# --- the visual lock ------------------------------------------------------- #
+aspect_ratio: "16:9"
+background: "纯白底（#FFFFFF），不加任何纹理或渐变"
+motif: 怪诞手绘
+line_style: 黑色细单线手绘，线条略带抖动与不规则，造型夸张、有拙趣，非写实
+
+palette:
+  base: "#FFFFFF"        # 白底
+  ink: "#1A1A1A"         # 主线条墨色
+  accents:               # 少量红橙蓝批注色，点到为止
+    red: "#E4572E"
+    orange: "#F2A65A"
+    blue: "#3A86FF"
+  accent_usage: 仅用于批注、圈点、关键词强调，每张图不超过总面积的 15%
+
+composition:
+  - 主体居中或偏左，右侧留批注空间
+  - 关键概念用手写体词语 + 圈/箭头批注
+  - 避免照片级写实，保持"手绘解说图"的随性感
+  - 不出现真实品牌 logo、可识别人物肖像
+
+# --- the consistency mechanism --------------------------------------------- #
+# A fixed seed shared by every render in one article, so the batch reads as one
+# hand. Real image backends that accept a seed use this verbatim; backends
+# without a seed param still receive the identical style preamble.
+consistency_seed: 73219
+
+negative_prompt: >-
+  照片写实, 3D渲染, 彩色渐变背景, 复杂纹理, 多种字体, 杂乱配色, 真人肖像, 品牌logo, 水印
+
+# Jinja2-rendered into every per-spot prompt by duanhui/style.py (m2). The
+# `{{ depicts }}` placeholder is filled from each Spot's depicts phrase.
+style_preamble: >-
+  一张 16:9 横版插图，纯白背景，黑色细线手绘风格，造型怪诞拙趣、有手绘抖动感，
+  仅用少量红/橙/蓝色块做批注式点缀，留白充足，像中文知识博主随手画在白纸上的解说图。
+  画面内容：{{ depicts }}。不要照片写实，不要彩色背景，不要水印。

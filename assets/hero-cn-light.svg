@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 300" width="880" height="300"
+     font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif"
+     role="img" aria-label="段绘 DuanHui — 整篇中文文章批量同风格配图">
+  <defs>
+    <linearGradient id="hc-l" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0071E3"/>
+      <stop offset="1" stop-color="#10A37F"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="880" height="300" rx="20" fill="#F5F5F7"/>
+
+  <!-- left: the locked 白底怪诞手绘 motif — a sheet with a hand-drawn doodle + 红橙蓝批注 -->
+  <g transform="translate(56,70)">
+    <rect x="0" y="0" width="170" height="160" rx="12" fill="#FFFFFF" stroke="#C9C9D0" stroke-width="1.5"/>
+    <!-- doodle: a wobbly bulb (concept) -->
+    <path d="M62,52 C50,40 56,22 75,22 C94,22 100,40 88,52 C82,58 84,66 84,72 L66,72 C66,66 68,58 62,52 Z"
+          fill="none" stroke="#1A1A1A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="68" y1="80" x2="82" y2="80" stroke="#1A1A1A" stroke-width="2.4" stroke-linecap="round"/>
+    <line x1="70" y1="86" x2="80" y2="86" stroke="#1A1A1A" stroke-width="2.4" stroke-linecap="round"/>
+    <!-- 红橙蓝 annotation dabs -->
+    <circle cx="36" cy="36" r="8" fill="#E4572E" fill-opacity="0.85"/>
+    <path d="M120,40 q14,-10 26,2" fill="none" stroke="#3A86FF" stroke-width="2.6" stroke-linecap="round"/>
+    <rect x="40" y="118" width="90" height="9" rx="4.5" fill="#F2A65A" fill-opacity="0.85"/>
+    <line x1="40" y1="106" x2="130" y2="106" stroke="#1A1A1A" stroke-width="1.6" stroke-opacity="0.35"/>
+  </g>
+
+  <!-- right: wordmark -->
+  <g transform="translate(270,0)">
+    <text x="0" y="128" font-size="74" font-weight="700" fill="url(#hc-l)" letter-spacing="2">段绘</text>
+    <text x="178" y="128" font-size="30" font-weight="600" fill="#6E6E73" letter-spacing="3">DuanHui</text>
+    <text x="2" y="172" font-size="21" font-weight="600" fill="#1D1D1F">整篇中文文章 · 按段落语义 · 批量同风格配图</text>
+    <text x="2" y="206" font-size="15" font-weight="500" fill="#6E6E73">把爆款 Codex Skill 的配图能力做成普通作者装即用的命令行工具 · 白底怪诞手绘</text>
+    <!-- pill chips -->
+    <g font-size="12.5" font-weight="600">
+      <rect x="2" y="226" width="92" height="26" rx="13" fill="#0071E3" fill-opacity="0.12"/>
+      <text x="48" y="243" text-anchor="middle" fill="#0A4F9E">keyless dry-run</text>
+      <rect x="104" y="226" width="118" height="26" rx="13" fill="#10A37F" fill-opacity="0.12"/>
+      <text x="163" y="243" text-anchor="middle" fill="#0B6B53">公众号 / 小红书 导出</text>
+      <rect x="232" y="226" width="96" height="26" rx="13" fill="#5E5CE6" fill-opacity="0.12"/>
+      <text x="280" y="243" text-anchor="middle" fill="#4B3FC4">怪诞手绘锁定</text>
+    </g>
+  </g>
+</svg>

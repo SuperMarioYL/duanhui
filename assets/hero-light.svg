@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 300" width="880" height="300"
+     font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif"
+     role="img" aria-label="DuanHui — batch-illustrate a whole Chinese article in one locked native style">
+  <defs>
+    <linearGradient id="he-l" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0071E3"/>
+      <stop offset="1" stop-color="#10A37F"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="880" height="300" rx="20" fill="#F5F5F7"/>
+
+  <!-- left: the locked white-canvas hand-drawn motif + red/orange/blue annotations -->
+  <g transform="translate(56,70)">
+    <rect x="0" y="0" width="170" height="160" rx="12" fill="#FFFFFF" stroke="#C9C9D0" stroke-width="1.5"/>
+    <path d="M62,52 C50,40 56,22 75,22 C94,22 100,40 88,52 C82,58 84,66 84,72 L66,72 C66,66 68,58 62,52 Z"
+          fill="none" stroke="#1A1A1A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="68" y1="80" x2="82" y2="80" stroke="#1A1A1A" stroke-width="2.4" stroke-linecap="round"/>
+    <line x1="70" y1="86" x2="80" y2="86" stroke="#1A1A1A" stroke-width="2.4" stroke-linecap="round"/>
+    <circle cx="36" cy="36" r="8" fill="#E4572E" fill-opacity="0.85"/>
+    <path d="M120,40 q14,-10 26,2" fill="none" stroke="#3A86FF" stroke-width="2.6" stroke-linecap="round"/>
+    <rect x="40" y="118" width="90" height="9" rx="4.5" fill="#F2A65A" fill-opacity="0.85"/>
+    <line x1="40" y1="106" x2="130" y2="106" stroke="#1A1A1A" stroke-width="1.6" stroke-opacity="0.35"/>
+  </g>
+
+  <!-- right: wordmark -->
+  <g transform="translate(270,0)">
+    <text x="0" y="122" font-size="62" font-weight="700" fill="url(#he-l)" letter-spacing="1">DuanHui</text>
+    <text x="2" y="156" font-size="17" font-weight="600" fill="#6E6E73" letter-spacing="2">段绘 · whole-article semantic illustration</text>
+    <text x="2" y="190" font-size="20" font-weight="600" fill="#1D1D1F">Batch-illustrate a whole Chinese article in one locked style.</text>
+    <text x="2" y="216" font-size="14.5" font-weight="500" fill="#6E6E73">The Codex Skill illustration power, made install-and-run for ordinary authors — no coding agent.</text>
+    <g font-size="12.5" font-weight="600">
+      <rect x="2" y="232" width="92" height="26" rx="13" fill="#0071E3" fill-opacity="0.12"/>
+      <text x="48" y="249" text-anchor="middle" fill="#0A4F9E">keyless demo</text>
+      <rect x="104" y="232" width="118" height="26" rx="13" fill="#10A37F" fill-opacity="0.12"/>
+      <text x="163" y="249" text-anchor="middle" fill="#0B6B53">drop-in export bundle</text>
+      <rect x="232" y="232" width="104" height="26" rx="13" fill="#5E5CE6" fill-opacity="0.12"/>
+      <text x="284" y="249" text-anchor="middle" fill="#4B3FC4">style consistency lock</text>
+    </g>
+  </g>
+</svg>
