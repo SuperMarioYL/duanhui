@@ -1,0 +1,55 @@
+# 段绘 — 锁定风格包：水墨（shuimo）
+#
+# The SECOND locked native aesthetic that ships with v0.2.0. v0.1 shipped only the
+# 怪诞手绘 (guaidan) pack; v0.2.0 activates the already-pluggable StyleLock loader
+# (style.py load_style_pack accepts any well-formed YAML pack and probes by pack_id)
+# so users can pick among shipped packs at runtime via `duanhui run --style <pack_id>`.
+#
+# Each run still locks its batch to ONE hand: the shared consistency_seed + the single
+# style_preamble mechanism is unchanged — only WHICH pack is locked becomes selectable.
+# This pack is the same primitive shape as guaidan.yaml (a StyleLock), just a different
+# native aesthetic (水墨 ink-wash), so the cross-image consistency guarantee holds.
+
+pack_id: shuimo
+display_name: 水墨 · 淡墨留白
+description: >-
+  中文知识科普图文的另一种本土审美：极淡的水墨晕染背景（近白而带微灰墨韵），
+  黑色毛笔写意线条，造型疏朗写意，辅以少量朱砂红批注式点题，16:9 横版，大量留白，
+  像作者用毛笔在宣纸上随手点染的解说图。与怪诞手绘同属"手绘解说图"家族，但更偏
+  东方写意、拙朴克制。
+
+# --- the visual lock ------------------------------------------------------- #
+aspect_ratio: "16:9"
+background: "极淡水墨晕染底（近白带微灰墨韵，#FBFAF7 主色），不加纹理或渐变色块"
+motif: 水墨写意
+line_style: 黑色毛笔写意线条，运笔有浓淡干湿变化，造型疏朗拙朴，非写实
+
+palette:
+  base: "#FBFAF7"        # 宣纸近白带微灰
+  ink: "#1F1B16"          # 主墨色（带暖墨韵）
+  accents:               # 少量朱砂红批注，点到为止
+    red: "#C0392B"
+    orange: "#D2873A"
+    blue: "#2C5F8A"
+  accent_usage: 仅用于批注、圈点、关键词强调，每张图不超过总面积的 12%
+
+composition:
+  - 主体居中或偏左，右侧留批注与留白空间
+  - 关键概念用手写体词语 + 圈/点批注，朱砂红仅作点题
+  - 避免照片级写实，保持"水墨写意解说图"的随性与克制
+  - 不出现真实品牌 logo、可识别人物肖像
+
+# --- the consistency mechanism --------------------------------------------- #
+# A fixed seed shared by every render in one article (distinct from guaidan's seed
+# so a shuimo batch reads as one hand that is visibly different from a guaidan batch).
+consistency_seed: 41731
+
+negative_prompt: >-
+  照片写实, 3D渲染, 鲜艳彩色渐变背景, 复杂纹理, 多种字体, 杂乱配色, 真人肖像, 品牌logo, 水印, 怪诞夸张造型
+
+# Jinja2-rendered into every per-spot prompt by duanhui/style.py. The
+# `{{ depicts }}` placeholder is filled from each Spot's depicts phrase.
+style_preamble: >-
+  一张 16:9 横版插图，极淡水墨晕染近白背景，黑色毛笔写意线条，造型疏朗拙朴、有浓淡干湿的
+  运笔感，仅用少量朱砂红色块做批注式点题，留白充足，像中文知识博主用毛笔在宣纸上随手点染的
+  解说图。画面内容：{{ depicts }}。不要照片写实，不要鲜艳彩色背景，不要水印，不要怪诞夸张造型。

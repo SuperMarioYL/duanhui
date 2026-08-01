@@ -158,7 +158,7 @@ duanhui version
 
 <h2 id="license"><img src="https://api.iconify.design/tabler:license.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> License</h2>
 
-MIT。欢迎在 [Issues](https://github.com/SuperMarioYL/duanhui/issues) 提 bug / 需求，或发 PR。
+Apache-2.0。欢迎在 [Issues](https://github.com/SuperMarioYL/duanhui/issues) 提 bug / 需求，或发 PR。
 
 ---
 
@@ -168,4 +168,4 @@ MIT。欢迎在 [Issues](https://github.com/SuperMarioYL/duanhui/issues) 提 bug
 段绘（DuanHui）— 把爆款 Codex Skill 的中文正文配图做成普通作者装即用的命令行工具：贴整篇文章，按段落语义批量出一组同风格白底怪诞手绘插图，导出即用。零环境、keyless 试跑。 https://github.com/SuperMarioYL/duanhui
 ```
 
-<p align="center"><sub><a href="./LICENSE">MIT</a> © 2026 SuperMarioYL</sub></p>
+<p align="center"><sub><a href="./LICENSE">Apache-2.0</a> © 2026 SuperMarioYL</sub></p>

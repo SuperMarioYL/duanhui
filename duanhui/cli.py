@@ -39,10 +39,22 @@ from duanhui.config import (
     Config,
     default_config_path,
 )
+from duanhui.cover import (
+    COVER_FILENAME,
+    build_cover_styled_spot,
+    export_cover,
+    plan_cover,
+    render_cover,
+)
 from duanhui.export import export_bundle
 from duanhui.placement import PlacementPlan, plan_article
 from duanhui.segment import Segment, segment_article
-from duanhui.style import build_styled_spots, load_style_pack
+from duanhui.style import (
+    DEFAULT_PACK_ID,
+    available_style_packs,
+    build_styled_spots,
+    load_style_pack,
+)
 
 app = typer.Typer(
     name="duanhui",
@@ -117,6 +129,21 @@ def _build_config(dry_run: bool) -> Config:
     return Config.load(force_mock=True if dry_run else None)
 
 
+def _load_style_or_exit(pack_id: str):
+    """Load a shipped style pack by id, or exit with a clear error."""
+    packs = available_style_packs()
+    try:
+        return load_style_pack(pack_id=pack_id)
+    except FileNotFoundError:
+        console.print(
+            f"[red]找不到风格包：{pack_id}[/red]（可选：{', '.join(packs) or '无'}）"
+        )
+        raise typer.Exit(code=2)
+    except ValueError as exc:
+        console.print(f"[red]风格包 {pack_id} 无效：{exc}[/red]")
+        raise typer.Exit(code=2)
+
+
 # --------------------------------------------------------------------------- #
 # commands
 # --------------------------------------------------------------------------- #
@@ -148,6 +175,16 @@ def run(
         max=12,
         help="最多配几张图（默认按文章长度自动估算 6–8 张）。",
     ),
+    cover: bool = typer.Option(
+        False,
+        "--cover",
+        help="封面模式：只生成一张封面/主视觉图，不做整篇配图。",
+    ),
+    style: str = typer.Option(
+        DEFAULT_PACK_ID,
+        "--style",
+        help="风格包 ID（默认 guaidan 怪诞手绘；duanhui list-styles 查看全部）。",
+    ),
 ) -> None:
     """对一篇文章跑完整流水线：分段 → 配图计划 →（渲染 → 导出）。"""
     cfg = _build_config(dry_run)
@@ -169,6 +206,59 @@ def run(
 
     # 2) placement ----------------------------------------------------------
     llm = make_llm_backend(cfg.effective_llm_backend(), api_key=cfg.llm_api_key)
+
+    # --cover: narrow the placement to a single hero cover illustration.
+    if cover:
+        cover_plan = plan_cover(segments, article_title=title)
+        console.print(
+            f"[green]✓[/green] 封面计划：[bold]{cover_plan.depicts}[/bold] "
+            f"（mock 预览未消耗额度）" if cfg.uses_mock_llm() else
+            f"[green]✓[/green] 封面计划：[bold]{cover_plan.depicts}[/bold]"
+        )
+        if dry_run:
+            console.print(
+                Panel(
+                    "这是 [bold]--dry-run[/bold] 预览，未渲染任何图片，也没有消耗额度。\n"
+                    f"去掉 --dry-run 即可渲染封面图（[bold]{COVER_FILENAME}[/bold]）；"
+                    "运行 [bold]duanhui init[/bold] 接入真实的国产图像后端。",
+                    title="dry-run · 封面模式",
+                    border_style="cyan",
+                )
+            )
+            raise typer.Exit(code=0)
+
+        style_pack = _load_style_or_exit(style)
+        styled = build_cover_styled_spot(cover_plan, style_pack)
+        out_dir = (out or Path("out")).resolve()
+        image_backend = make_image_backend(
+            cfg.effective_image_backend(), api_key=cfg.image_api_key
+        )
+        backend_label = (
+            "mock（keyless 占位图）"
+            if cfg.uses_mock_image()
+            else cfg.effective_image_backend()
+        )
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            console=console,
+            transient=True,
+        ) as progress:
+            progress.add_task(
+                f"用 {backend_label} 渲染 1 张封面主视觉…", total=None
+            )
+            rendered = render_cover(styled, image_backend, out_dir)
+        bundle = export_cover(
+            styled, rendered, style_pack, out_dir, article_title=title
+        )
+        console.print(
+            f"[green]✓[/green] 已渲染封面图 [bold]{COVER_FILENAME}[/bold]，"
+            f"风格包 [bold]{style_pack.pack_id}[/bold]，"
+            f"consistency_seed={style_pack.consistency_seed}"
+        )
+        _render_export_summary(bundle, mock_image=cfg.uses_mock_image())
+        return
+
     plan = plan_article(
         segments, llm, max_spots=cfg.max_spots, article_title=title
     )
@@ -190,8 +280,8 @@ def run(
         raise typer.Exit(code=0)
 
     # 3) style-lock ---------------------------------------------------------
-    style = load_style_pack()
-    styled = build_styled_spots(plan, style)
+    style_pack = _load_style_or_exit(style)
+    styled = build_styled_spots(plan, style_pack)
 
     # 4) render -------------------------------------------------------------
     out_dir = (out or Path("out")).resolve()
@@ -215,12 +305,12 @@ def run(
 
     # 5) export -------------------------------------------------------------
     bundle = export_bundle(
-        segments, styled, rendered, style, out_dir, article_title=title
+        segments, styled, rendered, style_pack, out_dir, article_title=title
     )
 
     console.print(
         f"[green]✓[/green] 已渲染 {bundle.image_count} 张插图，"
-        f"风格包 [bold]{style.pack_id}[/bold]，consistency_seed={style.consistency_seed}"
+        f"风格包 [bold]{style_pack.pack_id}[/bold]，consistency_seed={style_pack.consistency_seed}"
     )
     _render_export_summary(bundle, mock_image=cfg.uses_mock_image())
 
@@ -311,6 +401,30 @@ def backends() -> None:
     table.add_row("图像 出图", ", ".join(available_image_backends()), "把每个配图点渲染成 PNG")
     console.print(table)
     console.print("[dim]mock 后端无需任何 key，用于 --dry-run 与 CI。[/dim]")
+
+
+@app.command(name="list-styles")
+def list_styles() -> None:
+    """列出可选的风格包（v0.2.0：默认 guaidan，另含 shuimo 水墨）。"""
+    table = Table(title="可选风格包", header_style="bold")
+    table.add_column("pack_id", style="cyan", no_wrap=True)
+    table.add_column("名称")
+    table.add_column("说明", style="dim")
+    for pid in available_style_packs():
+        try:
+            pack = load_style_pack(pack_id=pid)
+            table.add_row(
+                pid,
+                pack.display_name or pid,
+                f"{pack.motif} · seed={pack.consistency_seed} · {pack.aspect_ratio}",
+            )
+        except Exception:
+            table.add_row(pid, "—", "[red]读取失败[/red]")
+    console.print(table)
+    console.print(
+        "[dim]用 duanhui run --style <pack_id> 选择风格包；"
+        "每篇文章仍锁定单一风格（同 seed + 同 preamble），整批同手。[/dim]"
+    )
 
 
 if __name__ == "__main__":  # pragma: no cover

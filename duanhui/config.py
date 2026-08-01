@@ -38,6 +38,8 @@ __all__ = [
     "DEFAULT_IMAGE_BACKEND",
     "ENV_LLM_KEYS",
     "ENV_IMAGE_KEYS",
+    "is_valid_backend",
+    "is_valid_image_backend",
 ]
 
 # The plan's default backends (model_targets in the frontmatter).
@@ -94,13 +96,15 @@ class Config(BaseModel):
     def effective_llm_backend(self) -> str:
         """The LLM backend name actually used, honouring the mock toggle.
 
-        Falls back to ``"mock"`` whenever mock mode is on, or when a real
-        backend is selected but no key is available — so a misconfigured run
-        degrades to the keyless preview instead of crashing.
+        Falls back to ``"mock"`` whenever mock mode is on, the configured name is
+        itself the mock, no key is available, **or the configured name is not a
+        known backend** (a typo degrades to the keyless preview instead of
+        crashing at ``make_llm_backend``). The same validity guard the image
+        family uses — the two backend families are symmetric.
         """
         if self.mock or is_mock_llm(self.llm_backend):
             return "mock"
-        if not self.llm_api_key:
+        if not self.llm_api_key or not is_valid_backend(self.llm_backend):
             return "mock"
         return self.llm_backend
 
@@ -110,14 +114,17 @@ class Config(BaseModel):
     def effective_image_backend(self) -> str:
         """The image backend name actually used, honouring the mock toggle.
 
-        Same degradation rule as the LLM side: mock mode, a mock selection, or a
-        real backend with no key all fall back to the keyless
-        :class:`~duanhui.backends.image.MockImageBackend`, so a full ``run``
-        always produces a batch of PNGs even with zero keys.
+        Same degradation rule as the LLM side: mock mode, a mock selection, a
+        real backend with no key, **or an unknown/typo'd backend name** all fall
+        back to the keyless :class:`~duanhui.backends.image.MockImageBackend`, so a
+        full ``run`` always produces a batch of PNGs even with zero keys — and a
+        misconfigured image backend never crashes the render step (the v0.1.0
+        image family lacked the LLM side's name-validity guard; v0.2.0 closes
+        that asymmetry so both families degrade symmetrically).
         """
         if self.mock or is_mock_image(self.image_backend):
             return "mock"
-        if not self.image_api_key:
+        if not self.image_api_key or not is_valid_image_backend(self.image_backend):
             return "mock"
         return self.image_backend
 
@@ -222,7 +229,19 @@ class Config(BaseModel):
 # --------------------------------------------------------------------------- #
 
 def is_valid_backend(name: str) -> bool:
+    """Whether ``name`` is a known LLM backend name (including ``mock``)."""
     return name.strip().lower() in set(available_llm_backends())
+
+
+def is_valid_image_backend(name: str) -> bool:
+    """Whether ``name`` is a known image backend name (including ``mock``).
+
+    Mirrors :func:`is_valid_backend` for the image family so an unknown/typo'd
+    image-backend name degrades to the keyless mock instead of crashing
+    ``make_image_backend`` — closing the v0.1.0 asymmetry where only the LLM
+    side validated its configured name.
+    """
+    return name.strip().lower() in set(available_image_backends())
 
 
 def _read_yaml(path: Path) -> Dict[str, Any]:

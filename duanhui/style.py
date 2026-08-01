@@ -30,6 +30,7 @@ __all__ = [
     "StyleLock",
     "StyledSpot",
     "load_style_pack",
+    "available_style_packs",
     "default_style_path",
     "build_styled_spots",
     "DEFAULT_PACK_ID",
@@ -42,8 +43,19 @@ DEFAULT_PACK_ID = "guaidan"
 _JINJA = Environment(autoescape=False, keep_trailing_newline=False)
 
 
+def _styles_dirs() -> List[Path]:
+    """The candidate directories that hold shipped style packs.
+
+    Probes both the installed-wheel layout (``duanhui/styles/``) and the
+    source-checkout layout (``<repo>/styles/``) so pack discovery works
+    regardless of how DuanHui was installed.
+    """
+    here = Path(__file__).resolve().parent  # …/duanhui
+    return [here / "styles", here.parent / "styles"]
+
+
 def default_style_path(pack_id: str = DEFAULT_PACK_ID) -> Path:
-    """Locate the shipped style pack YAML, dev layout or installed layout.
+    """Locate a shipped style pack YAML by ``pack_id``.
 
     In a source checkout the packs live at ``<repo>/styles/<pack>.yaml``; in an
     installed wheel they are bundled under ``duanhui/styles/<pack>.yaml`` (see
@@ -61,6 +73,30 @@ def default_style_path(pack_id: str = DEFAULT_PACK_ID) -> Path:
             return cand
     # Fall back to the source-checkout path for a clear error message.
     return candidates[1]
+
+
+def available_style_packs() -> List[str]:
+    """The ``pack_id``\\s of every shipped style pack, ``guaidan`` first.
+
+    Scans the installed-wheel and source-checkout style directories for
+    ``*.yaml`` packs. v0.1 shipped only ``guaidan``; v0.2.0 ships a second
+    locked pack (``shuimo``) and activates runtime selection via
+    ``duanhui run --style <pack_id>`` / ``duanhui list-styles``.
+    """
+    seen: set[str] = set()
+    found: List[str] = []
+    for d in _styles_dirs():
+        if not d.is_dir():
+            continue
+        for p in sorted(d.glob("*.yaml")):
+            pid = p.stem
+            if pid in seen:
+                continue
+            seen.add(pid)
+            found.append(pid)
+    # keep guaidan first (the default), then the rest in stable order.
+    rest = [p for p in found if p != DEFAULT_PACK_ID]
+    return ([DEFAULT_PACK_ID] if DEFAULT_PACK_ID in seen else []) + sorted(rest)
 
 
 class StyleLock(BaseModel):
@@ -137,14 +173,23 @@ class StyledSpot(BaseModel):
         return f"illustration_{self.order + 1:02d}.png"
 
 
-def load_style_pack(path: Optional[Path] = None) -> StyleLock:
+def load_style_pack(
+    path: Optional[Path] = None,
+    *,
+    pack_id: Optional[str] = None,
+) -> StyleLock:
     """Load and validate a style pack YAML into a :class:`StyleLock`.
 
     Parameters
     ----------
     path:
-        Pack file to read. Defaults to the shipped ``guaidan`` pack found by
-        :func:`default_style_path`.
+        Pack file to read. When given, ``pack_id`` is ignored.
+    pack_id:
+        Select a shipped pack by id (e.g. ``"guaidan"`` or ``"shuimo"``).
+        Defaults to the shipped ``guaidan`` pack found by
+        :func:`default_style_path`. v0.2.0 activates this selector so
+        ``duanhui run --style <pack_id>`` can pick among shipped packs at
+        runtime — the format was already pluggable in v0.1, only one shipped.
 
     Raises
     ------
@@ -154,7 +199,8 @@ def load_style_pack(path: Optional[Path] = None) -> StyleLock:
         If the YAML is malformed or missing required fields
         (``consistency_seed`` / ``style_preamble``).
     """
-    path = path or default_style_path()
+    if path is None:
+        path = default_style_path(pack_id or DEFAULT_PACK_ID)
     if not path.is_file():
         raise FileNotFoundError(
             f"style pack not found: {path} — the shipped 'guaidan' pack is missing"

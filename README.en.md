@@ -11,7 +11,7 @@
 <p align="center"><sub>DuanHui is the install-and-run CLI that batch-illustrates a whole Chinese article in one locked native style — the Codex Skill illustration power, without a coding agent.</sub></p>
 
 <p align="center">
-  <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue.svg" alt="Apache-2.0"></a>
   <a href="https://github.com/SuperMarioYL/duanhui/releases"><img src="https://img.shields.io/github/v/release/SuperMarioYL/duanhui" alt="latest release"></a>
   <a href="https://github.com/SuperMarioYL/duanhui/actions/workflows/ci.yml"><img src="https://github.com/SuperMarioYL/duanhui/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
   <img src="https://img.shields.io/badge/python-3.12-3776AB.svg" alt="Python 3.12">
@@ -158,7 +158,7 @@ The local install and CLI are **free and open source, always**. A planned paid t
 
 <h2 id="license"><img src="https://api.iconify.design/tabler:license.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> License</h2>
 
-MIT. Bug reports and feature ideas welcome in [Issues](https://github.com/SuperMarioYL/duanhui/issues); PRs too.
+Apache-2.0. Bug reports and feature ideas welcome in [Issues](https://github.com/SuperMarioYL/duanhui/issues); PRs too.
 
 ---
 
@@ -168,4 +168,4 @@ MIT. Bug reports and feature ideas welcome in [Issues](https://github.com/SuperM
 DuanHui — batch-illustrate a whole Chinese article in one locked native style. The Codex Skill illustration power, install-and-run, no coding agent. Paste an article, get a same-style set, export. Keyless dry-run. https://github.com/SuperMarioYL/duanhui
 ```
 
-<p align="center"><sub><a href="./LICENSE">MIT</a> © 2026 SuperMarioYL</sub></p>
+<p align="center"><sub><a href="./LICENSE">Apache-2.0</a> © 2026 SuperMarioYL</sub></p>
