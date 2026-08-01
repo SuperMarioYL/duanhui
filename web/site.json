@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "name": "duanhui",
+  "github": "https://github.com/SuperMarioYL/duanhui",
+  "host": "duanhui.lei6393.com",
+  "lang": { "primary": "zh", "toggle": true },
+  "accent": ["#e4572e"],
+  "hero": {
+    "eyebrow": {
+      "zh": "整篇配图 · 同一种风格 · 零账号",
+      "en": "Whole-article · One style · Keyless"
+    },
+    "headline": {
+      "zh": "贴一整篇中文文章\n自动配上一批同风格手绘插图",
+      "en": "Paste a whole Chinese article\nGet a batch of same-style hand-drawn illustrations"
+    },
+    "sub": {
+      "zh": "按段落语义决定在哪配图、配什么，再锁定一种白底怪诞手绘风格整批渲染，导出即贴进公众号 / 小红书。不写代码也能跑。",
+      "en": "It decides where to illustrate and what each picture shows from the paragraph meaning, locks one white-background hand-drawn style across the whole batch, and exports a drop-in folder for WeChat / Xiaohongshu. Runs without writing code."
+    },
+    "command": "duanhui run article.md",
+    "cta": { "zh": "零额度先试", "en": "Try it keyless" },
+    "ctaGithub": { "zh": "在 GitHub 查看", "en": "View on GitHub" }
+  },
+  "advantages": [
+    {
+      "title": {
+        "zh": "读完整篇，再决定哪几段配图",
+        "en": "Reads the whole article, then picks where pictures go"
+      },
+      "body": {
+        "zh": "不是机械地每段塞一张图。它先分清哪些是概念、哪些是例子、哪些只是过渡，再挑最值得配图的段落，并为每张图想好画什么——一篇文章出一整套讲得通的图。",
+        "en": "It doesn't stuff a picture into every paragraph. It tells concepts and examples apart from filler, picks the paragraphs worth illustrating, and decides what each picture should show — so one article yields one coherent set."
+      },
+      "chips": [
+        "› 优先给概念 / 例子段配图",
+        "› 一篇文章出一整套"
+      ]
+    },
+    {
+      "title": {
+        "zh": "整批同一种手绘，像同一只手画的",
+        "en": "One hand-drawn style, across the whole batch"
+      },
+      "body": {
+        "zh": "每张图共用同一份风格说明和同一个种子，所以一篇文章的插图看起来出自同一只手——白底怪诞手绘，少量红橙蓝批注。也能切到水墨写意，整篇仍然同手。",
+        "en": "Every picture shares the same style brief and the same seed, so a batch reads as one hand — white-background hand-drawn with a few red-orange-blue notes. Or switch to ink-wash; the whole article still reads as one hand."
+      },
+      "chips": [
+        "› 怪诞手绘 / 水墨写意",
+        "› 风格锁定，不漂移"
+      ]
+    },
+    {
+      "title": {
+        "zh": "先看结果，再决定花不花额度",
+        "en": "See the result before you spend a credit"
+      },
+      "body": {
+        "zh": "不用配任何 key、不用登录。一条命令先打印出整篇配图计划，再用占位图跑完整套流水线——你看完满意了，再接你自己的国产出图模型出真图。",
+        "en": "No keys, no sign-in. One command first prints the whole placement plan, then runs the full pipeline on placeholder art — once you like what you see, plug in your own image model for real renders."
+      },
+      "chips": [
+        "› 装完即跑，免配 key",
+        "› 占位图也能跑通整篇"
+      ]
+    },
+    {
+      "title": {
+        "zh": "封面或整篇，一条命令切",
+        "en": "Cover or whole article — one command"
+      },
+      "body": {
+        "zh": "只要一张主视觉封面？用 --cover 从标题语义出一张主图；要整篇配图就去掉它。导出文件夹里有图、有人类可读的贴图标记、和机器可读的映射，照着贴进公众号 / 小红书编辑器即可。",
+        "en": "Want just one hero cover? Use --cover to get a single main image from the title. Want the whole article illustrated? Drop it. The export folder has the images, a human-readable paste-guide, and a machine-readable map — drop it into your editor and go."
+      },
+      "chips": [
+        "› --cover 出一张封面主视觉",
+        "› 导出即贴公众号 / 小红书"
+      ]
+    }
+  ],
+  "scene": { "kind": "particle-field" },
+  "cta": {
+    "headline": {
+      "zh": "装一条命令，给每篇文章配一整套图",
+      "en": "One install, a whole illustrated article per run"
+    },
+    "sub": {
+      "zh": "本地命令行工具，开源、零账号可试，接你自己的国产出图模型出真图。",
+      "en": "A local command-line tool — open source, keyless to try, and ready for your own image model when you want real renders."
+    },
+    "button": { "zh": "在 GitHub 查看", "en": "View on GitHub" }
+  },
+  "footer": {
+    "tag": {
+      "zh": "开源 · Apache-2.0 · 由 SuperMarioYL 维护",
+      "en": "Open source · Apache-2.0 · maintained by SuperMarioYL"
+    }
+  }
+}
