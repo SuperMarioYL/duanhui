@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "duanhui"
-version = "0.2.0"
+version = "0.3.0"
 description = "段绘（DuanHui）— 把整篇中文文章按段落语义批量配上同风格白底怪诞手绘插图的命令行工具。Batch-illustrate a whole Chinese article in one locked native style."
 readme = "README.md"
 requires-python = ">=3.12"

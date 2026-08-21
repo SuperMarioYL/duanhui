@@ -231,13 +231,28 @@ class _HttpImageBackend(ImageBackend):
 
 
 class TongyiWanxiangBackend(_HttpImageBackend):
-    """通义万相 (Alibaba DashScope text-to-image)."""
+    """通义万相 (Alibaba DashScope text-to-image).
+
+    DashScope image synthesis runs **asynchronously**: the ``X-DashScope-Async:
+    enable`` header makes the POST only *submit* the job and return a
+    ``task_id`` (``output.task_status`` is ``PENDING``); the finished image URL
+    is not in the POST body and only appears after polling the task endpoint
+    until ``task_status == "SUCCEEDED"``. The previous code set the async
+    header but read ``output.results`` straight off the POST response — which
+    is empty in async mode — so every real keyed run raised "no image url".
+    """
 
     name = "tongyi-wanxiang"
     _ENDPOINT = (
         "https://dashscope.aliyuncs.com/api/v1/services/aigc/"
         "text2image/image-synthesis"
     )
+    _TASK_ENDPOINT = "https://dashscope.aliyuncs.com/api/v1/tasks/{task_id}"
+
+    # Polling cadence / ceiling for the async task (DashScope image jobs finish
+    # in a few seconds). The interval stays inside the request timeout budget.
+    _POLL_INTERVAL = 1.0
+    _POLL_TIMEOUT = 120.0
 
     def _request_image(self, spot: StyledSpot) -> bytes:  # pragma: no cover - network
         import httpx
@@ -260,10 +275,45 @@ class TongyiWanxiangBackend(_HttpImageBackend):
             resp = client.post(self._ENDPOINT, json=body, headers=headers)
             resp.raise_for_status()
             data = resp.json()
+            # A sync-style result URL would already be present; otherwise async
+            # mode returns a task_id to poll until the image is ready.
             url = _dig(data, "output", "results", 0, "url")
             if not url:
-                raise RuntimeError(f"{self.name}: no image url in response")
+                task_id = _dig(data, "output", "task_id")
+                if not task_id:
+                    raise RuntimeError(
+                        f"{self.name}: no task_id or image url in response"
+                    )
+                url = self._poll_task(client, task_id, headers)
             return client.get(url).content
+
+    def _poll_task(self, client, task_id: str, headers: dict) -> str:
+        """Poll the DashScope task endpoint until the image URL is ready.
+
+        Returns the first ``output.results[0].url`` once the task reports
+        ``SUCCEEDED``; raises ``RuntimeError`` on ``FAILED`` or timeout.
+        """
+        import time
+
+        task_url = self._TASK_ENDPOINT.format(task_id=task_id)
+        deadline = time.monotonic() + self._POLL_TIMEOUT
+        while True:
+            resp = client.get(task_url, headers=headers)
+            resp.raise_for_status()
+            data = resp.json()
+            status = _dig(data, "output", "task_status")
+            if status == "SUCCEEDED":
+                url = _dig(data, "output", "results", 0, "url")
+                if not url:
+                    raise RuntimeError(
+                        f"{self.name}: task succeeded but no image url"
+                    )
+                return url
+            if status == "FAILED":
+                raise RuntimeError(f"{self.name}: image task failed")
+            if time.monotonic() >= deadline:
+                raise RuntimeError(f"{self.name}: image task timed out")
+            time.sleep(self._POLL_INTERVAL)
 
 
 class KlingBackend(_HttpImageBackend):

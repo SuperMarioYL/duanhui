@@ -65,6 +65,13 @@ ENV_IMAGE_KEYS: Dict[str, str] = {
 # Env var that forces mock mode regardless of configured keys (used by CI).
 ENV_FORCE_MOCK = "DUANHUI_MOCK"
 
+# Hard bounds on max_spots — the Field constraint and the YAML clamp share
+# these so the config-file path agrees with the CLI --max-spots (min=1, max=12)
+# on what is valid. A hand-edited out-of-range value is clamped instead of
+# crashing Config.load with an uncaught pydantic ValidationError.
+MAX_SPOTS_MIN = 1
+MAX_SPOTS_MAX = 12
+
 
 def default_config_path() -> Path:
     """Location of the user config file (``~/.duanhui/config.yaml``)."""
@@ -85,7 +92,7 @@ class Config(BaseModel):
     image_backend: str = Field(default=DEFAULT_IMAGE_BACKEND)
     llm_api_key: Optional[str] = Field(default=None, repr=False)
     image_api_key: Optional[str] = Field(default=None, repr=False)
-    max_spots: Optional[int] = Field(default=None, ge=1, le=12)
+    max_spots: Optional[int] = Field(default=None, ge=MAX_SPOTS_MIN, le=MAX_SPOTS_MAX)
     # When True, every backend is forced to its keyless mock.
     mock: bool = Field(default=False)
 
@@ -174,6 +181,11 @@ class Config(BaseModel):
             max_spots = int(max_spots) if max_spots is not None else None
         except (TypeError, ValueError):
             max_spots = None
+        # Clamp a hand-edited out-of-range value into [1, 12] so the file path
+        # degrades cleanly instead of raising an uncaught ValidationError (the
+        # CLI --max-spots is guarded by typer min/max; this mirrors that here).
+        if max_spots is not None:
+            max_spots = max(MAX_SPOTS_MIN, min(MAX_SPOTS_MAX, max_spots))
 
         env_force = os.environ.get(ENV_FORCE_MOCK, "").strip().lower() in {
             "1",
@@ -181,10 +193,11 @@ class Config(BaseModel):
             "yes",
             "on",
         }
+        # mock is only the explicit global force (--dry-run / DUANHUI_MOCK); an
+        # unknown/typo'd LLM name no longer sets it, so a valid+keyed image
+        # backend is not silently dragged to mock by a bad LLM name. Each family
+        # degrades on its own via the validity guard in effective_*_backend().
         mock = bool(force_mock) if force_mock is not None else env_force
-        if not is_valid_backend(llm_backend):
-            # an unknown configured backend silently degrades to mock.
-            mock = True
 
         return cls(
             llm_backend=llm_backend,

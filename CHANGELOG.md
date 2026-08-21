@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-08-22
+
+### Fixed
+- **通义万相 default image backend now polls for the result**: the async
+  (`X-DashScope-Async: enable`) POST only submits the job and returns a
+  `task_id`, but the backend read `output.results` straight off the POST
+  response — which is empty in async mode — so every real keyed run raised
+  `RuntimeError("tongyi-wanxiang: no image url in response")`. The backend now
+  reads `output.task_id` and polls the DashScope task endpoint until
+  `task_status == "SUCCEEDED"` before fetching the image URL.
+- **an invalid LLM backend name no longer forces the image backend to mock**:
+  a typo'd `llm_backend` in config used to set the global `mock` flag in
+  `Config.load`, which silently degraded a valid, keyed image backend to the
+  keyless mock (cross-family contamination). The block is removed; each family
+  now degrades independently via its own validity guard in
+  `effective_*_backend()`.
+- **out-of-range `max_spots` in the config file no longer crashes `run`**: a
+  hand-edited `max_spots: 15` (or `0`) raised an uncaught pydantic
+  `ValidationError` because the file path was not clamped like the CLI
+  `--max-spots` (`min=1, max=12`). `Config.load` now clamps the value into
+  `[1, 12]`. New `MAX_SPOTS_MIN` / `MAX_SPOTS_MAX` constants are the single
+  source of truth shared by the `Field` constraint and the clamp.
+
 ## [0.2.0] - 2026-08-02
 
 ### Fixed
@@ -55,6 +78,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `duanhui` CLI with `run`, `init`, and `--dry-run`, a keyless end-to-end test
   suite, and a bilingual (简体中文 / English) README.
 
-[Unreleased]: https://github.com/SuperMarioYL/duanhui/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/SuperMarioYL/duanhui/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/SuperMarioYL/duanhui/releases/tag/v0.3.0
 [0.2.0]: https://github.com/SuperMarioYL/duanhui/releases/tag/v0.2.0
 [0.1.0]: https://github.com/SuperMarioYL/duanhui/releases/tag/v0.1.0
