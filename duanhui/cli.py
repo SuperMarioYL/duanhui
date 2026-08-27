@@ -247,7 +247,11 @@ def run(
             progress.add_task(
                 f"用 {backend_label} 渲染 1 张封面主视觉…", total=None
             )
-            rendered = render_cover(styled, image_backend, out_dir)
+            try:
+                rendered = render_cover(styled, image_backend, out_dir)
+            except RuntimeError as exc:
+                console.print(f"[red]渲染失败：{exc}[/red]")
+                raise typer.Exit(code=1)
         bundle = export_cover(
             styled, rendered, style_pack, out_dir, article_title=title
         )
@@ -259,9 +263,13 @@ def run(
         _render_export_summary(bundle, mock_image=cfg.uses_mock_image())
         return
 
-    plan = plan_article(
-        segments, llm, max_spots=cfg.max_spots, article_title=title
-    )
+    try:
+        plan = plan_article(
+            segments, llm, max_spots=cfg.max_spots, article_title=title
+        )
+    except RuntimeError as exc:
+        console.print(f"[red]配图失败：{exc}[/red]")
+        raise typer.Exit(code=1)
     if plan.is_empty():
         console.print("[yellow]没有找到适合配图的段落。[/yellow]")
         raise typer.Exit(code=0)
@@ -301,7 +309,11 @@ def run(
         progress.add_task(
             f"用 {backend_label} 渲染 {len(styled)} 张同风格插图…", total=None
         )
-        rendered = image_backend.render_batch(styled, images_dir)
+        try:
+            rendered = image_backend.render_batch(styled, images_dir)
+        except RuntimeError as exc:
+            console.print(f"[red]渲染失败：{exc}[/red]")
+            raise typer.Exit(code=1)
 
     # 5) export -------------------------------------------------------------
     bundle = export_bundle(

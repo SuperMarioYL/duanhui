@@ -229,6 +229,31 @@ def _extract_json_array(content: str) -> List[RawSpot]:
     return [p for p in parsed if isinstance(p, dict)]
 
 
+def _dig(data: object, *path: object) -> object:
+    """Safely walk a nested dict/list response, returning ``None`` on any miss.
+
+    Mirrors :func:`duanhui.backends.image._dig` so the LLM family can pull a
+    chat-completion field out of an arbitrary provider response without crashing
+    on a 200-with-error-body (no ``choices``), an empty ``choices`` list, or a
+    ``null`` ``content`` — the shapes that crashed the previous
+    ``data["choices"][0]["message"]["content"]`` access.
+    """
+    cur = data
+    for key in path:
+        try:
+            if isinstance(key, int) and isinstance(cur, (list, tuple)):
+                cur = cur[key]
+            elif isinstance(cur, dict):
+                cur = cur.get(key)  # type: ignore[arg-type]
+            else:
+                return None
+        except (IndexError, KeyError, TypeError):
+            return None
+        if cur is None:
+            return None
+    return cur
+
+
 class _OpenAICompatBackend(LLMBackend):
     """Shared HTTP plumbing for OpenAI-compatible chat-completion providers.
 
@@ -288,8 +313,22 @@ class _OpenAICompatBackend(LLMBackend):
             )
             resp.raise_for_status()
             data = resp.json()
-        content = data["choices"][0]["message"]["content"]
-        return _extract_json_array(content)
+        # Walk the response safely: CN providers frequently return a
+        # 200-with-error-body (no ``choices``), an empty ``choices`` list, or a
+        # ``null`` ``content`` (refusal/filtered turn) — each of which used to
+        # crash `run` with an opaque KeyError/IndexError/AttributeError.
+        content = _dig(data, "choices", 0, "message", "content")
+        if not isinstance(content, str) or not content.strip():
+            raise RuntimeError(
+                f"{self.name}: LLM returned no usable content "
+                f"(got {type(content).__name__})"
+            )
+        try:
+            return _extract_json_array(content)
+        except ValueError as exc:
+            raise RuntimeError(
+                f"{self.name}: could not parse LLM placement JSON: {exc}"
+            ) from exc
 
 
 class DeepSeekBackend(_OpenAICompatBackend):

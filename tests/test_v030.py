@@ -257,10 +257,10 @@ def test_config_max_spots_in_range_unchanged(tmp_path, monkeypatch) -> None:
 
 
 def test_version_is_030() -> None:
-    assert __version__ == "0.3.0"
+    assert __version__ == "0.4.0"
 
 
 def test_cli_version_reports_030() -> None:
     result = runner.invoke(app, ["version"])
     assert result.exit_code == 0, result.stdout
-    assert "0.3.0" in result.stdout
+    assert "0.4.0" in result.stdout

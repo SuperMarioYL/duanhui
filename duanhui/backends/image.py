@@ -219,11 +219,37 @@ class _HttpImageBackend(ImageBackend):
         raise NotImplementedError
 
     @staticmethod
+    def _fetch_image_bytes(client, url: str, *, name: str) -> bytes:
+        """Download the finished image bytes from ``url``.
+
+        Every POST is validated with ``raise_for_status``, but the final GET that
+        actually fetches the PNG was not — so a failed/expired download (a
+        short-lived presigned OSS URL from tongyi-wanxiang, a 403/404, or a
+        transient 5xx) returned an error body that ``render`` wrote verbatim as a
+        corrupt ``.png``. This surfaces any download failure as a clear
+        ``RuntimeError`` instead.
+        """
+        import httpx  # deferred: keyless path must import without httpx errors
+
+        try:
+            resp = client.get(url)
+            resp.raise_for_status()
+        except httpx.HTTPError as exc:
+            raise RuntimeError(f"{name}: image download failed: {exc}") from exc
+        return resp.content
+
+    @staticmethod
     def _aspect_size(spot: StyledSpot, long_edge: int = 1280) -> str:
         """Format the canvas size string (e.g. ``"1280*720"``) for the API."""
         try:
             aw_s, ah_s = spot.aspect_ratio.split(":")
             aw, ah = int(aw_s), int(ah_s)
+            # Guard a zero-dimension ratio (e.g. a hand-edited pack with
+            # "0:9") so the division below never raises ZeroDivisionError —
+            # the mock's _canvas already enforces this; the real backends
+            # now match it instead of crashing.
+            if aw <= 0 or ah <= 0:
+                raise ValueError
         except (ValueError, AttributeError):
             aw, ah = 16, 9
         height = max(1, round(long_edge * ah / aw))
@@ -285,7 +311,7 @@ class TongyiWanxiangBackend(_HttpImageBackend):
                         f"{self.name}: no task_id or image url in response"
                     )
                 url = self._poll_task(client, task_id, headers)
-            return client.get(url).content
+            return self._fetch_image_bytes(client, url, name=self.name)
 
     def _poll_task(self, client, task_id: str, headers: dict) -> str:
         """Poll the DashScope task endpoint until the image URL is ready.
@@ -337,7 +363,7 @@ class KlingBackend(_HttpImageBackend):
             url = _dig(resp.json(), "data", 0, "url")
             if not url:
                 raise RuntimeError(f"{self.name}: no image url in response")
-            return client.get(url).content
+            return self._fetch_image_bytes(client, url, name=self.name)
 
 
 class JimengBackend(_HttpImageBackend):
@@ -357,7 +383,7 @@ class JimengBackend(_HttpImageBackend):
             url = _dig(resp.json(), "data", "image_urls", 0)
             if not url:
                 raise RuntimeError(f"{self.name}: no image url in response")
-            return client.get(url).content
+            return self._fetch_image_bytes(client, url, name=self.name)
 
 
 class SeeDreamBackend(_HttpImageBackend):
@@ -389,7 +415,7 @@ class SeeDreamBackend(_HttpImageBackend):
                 return base64.b64decode(b64)
             url = _dig(resp.json(), "data", 0, "url")
             if url:
-                return client.get(url).content
+                return self._fetch_image_bytes(client, url, name=self.name)
             raise RuntimeError(f"{self.name}: no image payload in response")
 
 

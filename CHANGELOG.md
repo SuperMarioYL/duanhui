@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-08-28
+
+### Fixed
+- **keyed LLM run no longer crashes on a non-standard chat response**: the
+  OpenAI-compatible placement backend read the completion as
+  `data["choices"][0]["message"]["content"]`, which raised an opaque
+  KeyError / IndexError / AttributeError when a CN provider returned a
+  200-with-error-body (no `choices`), an empty `choices` list, or a `null`
+  `content` (refusal/filtered turn). The content is now extracted safely
+  (returning `None` on any miss, mirroring the image backends' `_dig`), and a
+  missing/`None`/non-string content or an unparseable JSON response surfaces as
+  a clear `RuntimeError` that `duanhui run` prints and exits on instead of a
+  traceback.
+- **real image backends no longer write a corrupt PNG on a failed download**:
+  all four real image backends fetched the finished image via
+  `client.get(url).content` with no `raise_for_status`, so a failed/expired
+  download (a short-lived presigned URL from the default tongyi-wanxiang, or a
+  403/404/5xx) returned an error body that was written verbatim as a `.png`. A
+  shared `_fetch_image_bytes` helper now validates the download and surfaces any
+  failure as a clear `RuntimeError` instead of a corrupt file.
+- **real image backends no longer crash on a zero-dimension aspect ratio**: a
+  hand-edited style pack with a zero-dimension `aspect_ratio` (e.g. `"0:9"`)
+  made `_aspect_size` divide by zero, crashing the real backends with an
+  uncaught `ZeroDivisionError`. The mock's zero-guard is now mirrored in
+  `_aspect_size` so a bad ratio falls back to 16:9 instead of crashing.
+
 ## [0.3.0] - 2026-08-22
 
 ### Fixed
