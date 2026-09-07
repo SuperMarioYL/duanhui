@@ -272,10 +272,10 @@ def test_mock_canvas_still_guards_zero() -> None:
 
 
 def test_version_is_040() -> None:
-    assert __version__ == "0.4.0"
+    assert __version__ == "0.5.0"
 
 
 def test_cli_version_reports_040() -> None:
     result = runner.invoke(app, ["version"])
     assert result.exit_code == 0, result.stdout
-    assert "0.4.0" in result.stdout
+    assert "0.5.0" in result.stdout

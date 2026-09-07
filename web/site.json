@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "content_version": 1,
+  "content_version": "0.5.0",
   "name": "duanhui",
   "github": "https://github.com/SuperMarioYL/duanhui",
   "host": "duanhui.lei6393.com",

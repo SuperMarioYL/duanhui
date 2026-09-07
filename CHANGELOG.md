@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-09-07
+
+### Fixed
+- **keyed runs no longer crash with an opaque traceback when a backend POST
+  fails**: both backend families validated every POST with
+  `raise_for_status()`, but the `httpx.HTTPStatusError` it raises on a 4xx/5xx
+  (a 401 expired key, 429 rate limit, or 500 provider outage) is not a
+  `RuntimeError`, so it escaped the CLI's `except RuntimeError` guards around
+  placement and render and surfaced as a raw traceback + exit 1. The v0.4.0 fix
+  had already wrapped the image DOWNLOAD (GET) path in a clear `RuntimeError`
+  via `_fetch_image_bytes`; the POST path was left unwrapped — an asymmetric
+  gap. The LLM placement backend's POST and all four real image backends' POSTs
+  (plus the tongyi task-poll GET) now route through a shared `_post` /
+  `_post_json` helper that catches `httpx.HTTPError` and re-raises a clear
+  `RuntimeError`, so a failed request prints a red message and exits cleanly
+  instead of a traceback. Since deepseek is the default LLM backend and
+  tongyi-wanxiang the default image backend, any keyed user whose provider
+  returns a non-2xx hit this on their first real run.
+
 ## [0.4.0] - 2026-08-28
 
 ### Fixed
