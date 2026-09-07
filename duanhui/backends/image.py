@@ -239,6 +239,25 @@ class _HttpImageBackend(ImageBackend):
         return resp.content
 
     @staticmethod
+    def _post_json(client, url: str, *, name: str, **kwargs):
+        """POST to a text-to-image endpoint and validate the response.
+
+        Mirrors :meth:`_fetch_image_bytes`: ``raise_for_status`` on a 4xx/5xx (a
+        401 expired key, 429 rate limit, or 500 provider outage) raises
+        ``httpx.HTTPStatusError``, which is not a ``RuntimeError`` and so escaped
+        the CLI's ``except RuntimeError`` guard as an opaque traceback. This wraps
+        the POST so a failed request surfaces as a clear ``RuntimeError`` instead.
+        """
+        import httpx  # deferred: keyless path must import without httpx errors
+
+        try:
+            resp = client.post(url, **kwargs)
+            resp.raise_for_status()
+        except httpx.HTTPError as exc:
+            raise RuntimeError(f"{name}: request failed: {exc}") from exc
+        return resp
+
+    @staticmethod
     def _aspect_size(spot: StyledSpot, long_edge: int = 1280) -> str:
         """Format the canvas size string (e.g. ``"1280*720"``) for the API."""
         try:
@@ -298,8 +317,9 @@ class TongyiWanxiangBackend(_HttpImageBackend):
             "X-DashScope-Async": "enable",
         }
         with httpx.Client(timeout=self._timeout) as client:
-            resp = client.post(self._ENDPOINT, json=body, headers=headers)
-            resp.raise_for_status()
+            resp = self._post_json(
+                client, self._ENDPOINT, name=self.name, json=body, headers=headers
+            )
             data = resp.json()
             # A sync-style result URL would already be present; otherwise async
             # mode returns a task_id to poll until the image is ready.
@@ -320,12 +340,18 @@ class TongyiWanxiangBackend(_HttpImageBackend):
         ``SUCCEEDED``; raises ``RuntimeError`` on ``FAILED`` or timeout.
         """
         import time
+        import httpx  # deferred: keyless path must import without httpx errors
 
         task_url = self._TASK_ENDPOINT.format(task_id=task_id)
         deadline = time.monotonic() + self._POLL_TIMEOUT
         while True:
-            resp = client.get(task_url, headers=headers)
-            resp.raise_for_status()
+            try:
+                resp = client.get(task_url, headers=headers)
+                resp.raise_for_status()
+            except httpx.HTTPError as exc:
+                raise RuntimeError(
+                    f"{self.name}: task poll failed: {exc}"
+                ) from exc
             data = resp.json()
             status = _dig(data, "output", "task_status")
             if status == "SUCCEEDED":
@@ -358,8 +384,9 @@ class KlingBackend(_HttpImageBackend):
         }
         headers = {"Authorization": f"Bearer {self._api_key}"}
         with httpx.Client(timeout=self._timeout) as client:
-            resp = client.post(self._ENDPOINT, json=body, headers=headers)
-            resp.raise_for_status()
+            resp = self._post_json(
+                client, self._ENDPOINT, name=self.name, json=body, headers=headers
+            )
             url = _dig(resp.json(), "data", 0, "url")
             if not url:
                 raise RuntimeError(f"{self.name}: no image url in response")
@@ -378,8 +405,9 @@ class JimengBackend(_HttpImageBackend):
         body = {"prompt": spot.prompt, "size": self._aspect_size(spot), "seed": spot.seed}
         headers = {"Authorization": f"Bearer {self._api_key}"}
         with httpx.Client(timeout=self._timeout) as client:
-            resp = client.post(self._ENDPOINT, json=body, headers=headers)
-            resp.raise_for_status()
+            resp = self._post_json(
+                client, self._ENDPOINT, name=self.name, json=body, headers=headers
+            )
             url = _dig(resp.json(), "data", "image_urls", 0)
             if not url:
                 raise RuntimeError(f"{self.name}: no image url in response")
@@ -408,8 +436,9 @@ class SeeDreamBackend(_HttpImageBackend):
             "Content-Type": "application/json",
         }
         with httpx.Client(timeout=self._timeout) as client:
-            resp = client.post(self._ENDPOINT, json=body, headers=headers)
-            resp.raise_for_status()
+            resp = self._post_json(
+                client, self._ENDPOINT, name=self.name, json=body, headers=headers
+            )
             b64 = _dig(resp.json(), "data", 0, "b64_json")
             if b64:
                 return base64.b64decode(b64)

@@ -274,6 +274,26 @@ class _OpenAICompatBackend(LLMBackend):
         self._api_key = api_key
         self._timeout = timeout
 
+    @staticmethod
+    def _post(client, url: str, *, name: str, **kwargs):
+        """POST JSON and validate the response, mirroring the image side.
+
+        ``raise_for_status`` on a 4xx/5xx (a 401 expired key, 429 rate limit, or
+        500 provider outage) raises ``httpx.HTTPStatusError``, which is not a
+        ``RuntimeError`` and so escaped the CLI's ``except RuntimeError`` guard
+        as an opaque traceback. This wraps the POST so a failed request surfaces
+        as a clear ``RuntimeError`` instead — symmetric with the image backends'
+        ``_fetch_image_bytes`` / ``_post_json`` helpers.
+        """
+        import httpx  # deferred: keyless path must import without httpx errors
+
+        try:
+            resp = client.post(url, **kwargs)
+            resp.raise_for_status()
+        except httpx.HTTPError as exc:
+            raise RuntimeError(f"{name}: LLM request failed: {exc}") from exc
+        return resp
+
     def plan(
         self,
         segments: Sequence[Segment],
@@ -306,12 +326,13 @@ class _OpenAICompatBackend(LLMBackend):
             "Content-Type": "application/json",
         }
         with httpx.Client(timeout=self._timeout) as client:
-            resp = client.post(
+            resp = self._post(
+                client,
                 f"{self.base_url.rstrip('/')}/chat/completions",
+                name=self.name,
                 json=body,
                 headers=headers,
             )
-            resp.raise_for_status()
             data = resp.json()
         # Walk the response safely: CN providers frequently return a
         # 200-with-error-body (no ``choices``), an empty ``choices`` list, or a
