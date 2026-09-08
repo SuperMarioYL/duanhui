@@ -104,6 +104,10 @@
           "alt": {
             "zh": "实际运行文章配图和封面 dry-run。示例文章分为 13 段，最多 3 个配图点，另生成一条封面计划。没有生成真实插图，也没有验证模型审美或跨图一致性。",
             "en": "The actual article and cover dry-runs split the sample into thirteen segments, choose up to three illustration spots and create one cover plan. They do not render real illustrations or validate model aesthetics or consistency."
+          },
+          "mobile": {
+            "light": "/assets/presentation/process-mobile-light.svg",
+            "dark": "/assets/presentation/process-mobile-dark.svg"
           }
         }
       },
@@ -122,6 +126,10 @@
           "alt": {
             "zh": "segment.py 划分并标记段落，placement.py 校验后端返回的位置与描述，style.py 给每个 spot 加入共享前缀与 seed，image backend 渲染，export.py 输出图片、placement_map.json 和 annotated.md。cover.py 提供单张封面路径。",
             "en": "segment.py splits and tags paragraphs. placement.py validates returned positions and briefs; style.py adds shared preambles and seeds. The image backend renders, and export.py writes images, placement_map.json and annotated.md. cover.py implements the single-cover route."
+          },
+          "mobile": {
+            "light": "/assets/presentation/architecture-mobile-light.svg",
+            "dark": "/assets/presentation/architecture-mobile-dark.svg"
           }
         }
       },
@@ -140,6 +148,10 @@
           "alt": {
             "zh": "placement_map 记录每张图的段落索引、prompt 和 seed，annotated.md 给作者定位提示。共享 seed 与前缀是一种控制输入的方式，不能单独保证不同模型输出同一视觉风格。",
             "en": "placement_map records paragraph indices, prompts and seeds, while annotated.md guides placement. Shared seeds and preambles control inputs but do not by themselves guarantee a uniform visual style across model outputs."
+          },
+          "mobile": {
+            "light": "/assets/presentation/integrations-mobile-light.svg",
+            "dark": "/assets/presentation/integrations-mobile-dark.svg"
           }
         }
       }
