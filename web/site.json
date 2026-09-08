@@ -1,102 +1,244 @@
 {
-  "schema": 1,
-  "content_version": "0.5.0",
-  "name": "duanhui",
+  "schema": 3,
+  "name": "段绘 DuanHui",
   "github": "https://github.com/SuperMarioYL/duanhui",
   "host": "duanhui.lei6393.com",
-  "lang": { "primary": "zh", "toggle": true },
-  "accent": ["#e4572e"],
+  "palette": "auto",
+  "lang": {
+    "primary": "zh",
+    "toggle": true
+  },
+  "meta": {
+    "visual_profile": "neon-particle",
+    "content_version": "0.5.0",
+    "demo_source": "docs/demo-results.json"
+  },
   "hero": {
     "eyebrow": {
-      "zh": "整篇配图 · 同一种风格 · 零账号",
-      "en": "Whole-article · One style · Keyless"
+      "zh": "将中文文章分段，先预览配图位置与画面描述，再选择后端渲染并导出图片映射。",
+      "en": "Segment a Chinese article, preview illustration positions and briefs, then render with a selected backend and export placement metadata."
     },
     "headline": {
-      "zh": "贴一整篇中文文章\n自动配上一批同风格手绘插图",
-      "en": "Paste a whole Chinese article\nGet a batch of same-style hand-drawn illustrations"
+      "zh": "先看配图计划，\n再决定生成什么",
+      "en": "Plan the illustrations.\nThen choose what to render."
     },
     "sub": {
-      "zh": "按段落语义决定在哪配图、配什么，再锁定一种白底怪诞手绘风格整批渲染，导出即贴进公众号 / 小红书。不写代码也能跑。",
-      "en": "It decides where to illustrate and what each picture shows from the paragraph meaning, locks one white-background hand-drawn style across the whole batch, and exports a drop-in folder for WeChat / Xiaohongshu. Runs without writing code."
+      "zh": "将中文文章分段，先预览配图位置与画面描述，再选择后端渲染并导出图片映射。",
+      "en": "Segment a Chinese article, preview illustration positions and briefs, then render with a selected backend and export placement metadata."
     },
-    "command": "duanhui run article.md",
-    "cta": { "zh": "零额度先试", "en": "Try it keyless" },
-    "ctaGithub": { "zh": "在 GitHub 查看", "en": "View on GitHub" }
+    "href": "#quickstart",
+    "cta": {
+      "zh": "运行示例",
+      "en": "Run the example"
+    },
+    "ctaGithub": {
+      "zh": "查看源码",
+      "en": "View source"
+    }
+  },
+  "scene": {
+    "kind": "neon-graph",
+    "caption": {
+      "zh": "文章分段 · 配图计划",
+      "en": "ARTICLE SEGMENTS · ILLUSTRATION PLAN"
+    },
+    "fallback": "/assets/presentation/scene-dark.svg",
+    "fallbackLight": "/assets/presentation/scene-light.svg"
   },
   "advantages": [
     {
       "title": {
-        "zh": "读完整篇，再决定哪几段配图",
-        "en": "Reads the whole article, then picks where pictures go"
+        "zh": "先预览位置",
+        "en": "Preview placement"
       },
       "body": {
-        "zh": "不是机械地每段塞一张图。它先分清哪些是概念、哪些是例子、哪些只是过渡，再挑最值得配图的段落，并为每张图想好画什么——一篇文章出一整套讲得通的图。",
-        "en": "It doesn't stuff a picture into every paragraph. It tells concepts and examples apart from filler, picks the paragraphs worth illustrating, and decides what each picture should show — so one article yields one coherent set."
-      },
-      "chips": [
-        "› 优先给概念 / 例子段配图",
-        "› 一篇文章出一整套"
-      ]
+        "zh": "在渲染前查看每个配图点的描述与原因。",
+        "en": "Review each illustration brief and reason before rendering."
+      }
     },
     {
       "title": {
-        "zh": "整批同一种手绘，像同一只手画的",
-        "en": "One hand-drawn style, across the whole batch"
+        "zh": "明确后端模式",
+        "en": "Know the backend mode"
       },
       "body": {
-        "zh": "每张图共用同一份风格说明和同一个种子，所以一篇文章的插图看起来出自同一只手——白底怪诞手绘，少量红橙蓝批注。也能切到水墨写意，整篇仍然同手。",
-        "en": "Every picture shares the same style brief and the same seed, so a batch reads as one hand — white-background hand-drawn with a few red-orange-blue notes. Or switch to ink-wash; the whole article still reads as one hand."
-      },
-      "chips": [
-        "› 怪诞手绘 / 水墨写意",
-        "› 风格锁定，不漂移"
-      ]
+        "zh": "dry-run 与 mock 明确标出离线占位行为。",
+        "en": "dry-run and mock mode explicitly mark offline placeholder behavior."
+      }
     },
     {
       "title": {
-        "zh": "先看结果，再决定花不花额度",
-        "en": "See the result before you spend a credit"
+        "zh": "保留图片映射",
+        "en": "Retain placement metadata"
       },
       "body": {
-        "zh": "不用配任何 key、不用登录。一条命令先打印出整篇配图计划，再用占位图跑完整套流水线——你看完满意了，再接你自己的国产出图模型出真图。",
-        "en": "No keys, no sign-in. One command first prints the whole placement plan, then runs the full pipeline on placeholder art — once you like what you see, plug in your own image model for real renders."
-      },
-      "chips": [
-        "› 装完即跑，免配 key",
-        "› 占位图也能跑通整篇"
-      ]
-    },
-    {
-      "title": {
-        "zh": "封面或整篇，一条命令切",
-        "en": "Cover or whole article — one command"
-      },
-      "body": {
-        "zh": "只要一张主视觉封面？用 --cover 从标题语义出一张主图；要整篇配图就去掉它。导出文件夹里有图、有人类可读的贴图标记、和机器可读的映射，照着贴进公众号 / 小红书编辑器即可。",
-        "en": "Want just one hero cover? Use --cover to get a single main image from the title. Want the whole article illustrated? Drop it. The export folder has the images, a human-readable paste-guide, and a machine-readable map — drop it into your editor and go."
-      },
-      "chips": [
-        "› --cover 出一张封面主视觉",
-        "› 导出即贴公众号 / 小红书"
-      ]
+        "zh": "导出包把文件与段落、prompt、seed 关联。",
+        "en": "The export bundle links files to paragraphs, prompts and seeds."
+      }
     }
   ],
-  "scene": { "kind": "particle-field" },
-  "cta": {
-    "headline": {
-      "zh": "装一条命令，给每篇文章配一整套图",
-      "en": "One install, a whole illustrated article per run"
+  "story": {
+    "intro": {
+      "title": {
+        "zh": "先把整篇的配图安排看清楚",
+        "en": "Review the whole article’s illustration plan"
+      },
+      "body": {
+        "zh": "一篇文章要配多张图时，除了画面风格，还要考虑每张图应该接在哪一段。段绘把分段、位置计划和共享风格提示连接起来，让作者先检查计划，再进入可能收费的渲染步骤。",
+        "en": "A multi-image article needs both visual direction and a decision about where each image belongs. DuanHui connects segmentation, placement planning and shared style prompts so authors can review the plan before a potentially paid rendering step."
+      }
     },
-    "sub": {
-      "zh": "本地命令行工具，开源、零账号可试，接你自己的国产出图模型出真图。",
-      "en": "A local command-line tool — open source, keyless to try, and ready for your own image model when you want real renders."
-    },
-    "button": { "zh": "在 GitHub 查看", "en": "View on GitHub" }
+    "sections": [
+      {
+        "title": {
+          "zh": "从输入到结果",
+          "en": "From input to result"
+        },
+        "body": {
+          "zh": "实际运行文章配图和封面 dry-run。示例文章分为 13 段，最多 3 个配图点，另生成一条封面计划。没有生成真实插图，也没有验证模型审美或跨图一致性。",
+          "en": "The actual article and cover dry-runs split the sample into thirteen segments, choose up to three illustration spots and create one cover plan. They do not render real illustrations or validate model aesthetics or consistency."
+        },
+        "image": {
+          "light": "/assets/presentation/process-light.svg",
+          "dark": "/assets/presentation/process-dark.svg",
+          "alt": {
+            "zh": "实际运行文章配图和封面 dry-run。示例文章分为 13 段，最多 3 个配图点，另生成一条封面计划。没有生成真实插图，也没有验证模型审美或跨图一致性。",
+            "en": "The actual article and cover dry-runs split the sample into thirteen segments, choose up to three illustration spots and create one cover plan. They do not render real illustrations or validate model aesthetics or consistency."
+          }
+        }
+      },
+      {
+        "title": {
+          "zh": "工作原理",
+          "en": "How it works"
+        },
+        "body": {
+          "zh": "segment.py 划分并标记段落，placement.py 校验后端返回的位置与描述，style.py 给每个 spot 加入共享前缀与 seed，image backend 渲染，export.py 输出图片、placement_map.json 和 annotated.md。cover.py 提供单张封面路径。",
+          "en": "segment.py splits and tags paragraphs. placement.py validates returned positions and briefs; style.py adds shared preambles and seeds. The image backend renders, and export.py writes images, placement_map.json and annotated.md. cover.py implements the single-cover route."
+        },
+        "image": {
+          "light": "/assets/presentation/architecture-light.svg",
+          "dark": "/assets/presentation/architecture-dark.svg",
+          "alt": {
+            "zh": "segment.py 划分并标记段落，placement.py 校验后端返回的位置与描述，style.py 给每个 spot 加入共享前缀与 seed，image backend 渲染，export.py 输出图片、placement_map.json 和 annotated.md。cover.py 提供单张封面路径。",
+            "en": "segment.py splits and tags paragraphs. placement.py validates returned positions and briefs; style.py adds shared preambles and seeds. The image backend renders, and export.py writes images, placement_map.json and annotated.md. cover.py implements the single-cover route."
+          }
+        }
+      },
+      {
+        "title": {
+          "zh": "能力与接入",
+          "en": "Capabilities and integration"
+        },
+        "body": {
+          "zh": "placement_map 记录每张图的段落索引、prompt 和 seed，annotated.md 给作者定位提示。共享 seed 与前缀是一种控制输入的方式，不能单独保证不同模型输出同一视觉风格。",
+          "en": "placement_map records paragraph indices, prompts and seeds, while annotated.md guides placement. Shared seeds and preambles control inputs but do not by themselves guarantee a uniform visual style across model outputs."
+        },
+        "image": {
+          "light": "/assets/presentation/integrations-light.svg",
+          "dark": "/assets/presentation/integrations-dark.svg",
+          "alt": {
+            "zh": "placement_map 记录每张图的段落索引、prompt 和 seed，annotated.md 给作者定位提示。共享 seed 与前缀是一种控制输入的方式，不能单独保证不同模型输出同一视觉风格。",
+            "en": "placement_map records paragraph indices, prompts and seeds, while annotated.md guides placement. Shared seeds and preambles control inputs but do not by themselves guarantee a uniform visual style across model outputs."
+          }
+        }
+      }
+    ],
+    "details": [
+      {
+        "title": {
+          "zh": "费用边界",
+          "en": "When API costs can occur"
+        },
+        "body": {
+          "zh": "有 key 的非 dry-run 可能调用远程后端；本示例只跑强制 mock 的计划。",
+          "en": "A keyed non-dry-run can call remote backends. This example runs forced-mock planning only."
+        }
+      }
+    ]
   },
-  "footer": {
-    "tag": {
-      "zh": "开源 · Apache-2.0 · 由 SuperMarioYL 维护",
-      "en": "Open source · Apache-2.0 · maintained by SuperMarioYL"
+  "demo": {
+    "title": {
+      "zh": "实际运行结果",
+      "en": "Actual demo output"
+    },
+    "note": {
+      "zh": "实际运行文章配图和封面 dry-run。示例文章分为 13 段，最多 3 个配图点，另生成一条封面计划。没有生成真实插图，也没有验证模型审美或跨图一致性。",
+      "en": "The actual article and cover dry-runs split the sample into thirteen segments, choose up to three illustration spots and create one cover plan. They do not render real illustrations or validate model aesthetics or consistency."
+    },
+    "source": "https://github.com/SuperMarioYL/duanhui/blob/main/docs/demo-results.json",
+    "steps": [
+      {
+        "label": {
+          "zh": "文章配图计划",
+          "en": "Article placement plan"
+        },
+        "body": {
+          "zh": "13 段文章输出 3 个 mock 配图点。",
+          "en": "The thirteen-segment article yields three mock spots."
+        },
+        "command": "DUANHUI_MOCK=1 python -m duanhui.cli run examples/sample_article.md --dry-run -n 3",
+        "output": "✓ 分段完成：13 段（标题：为什么你的待办清单总是越列越长？）\n                          配图计划 · 共 3 处（mock 预览，未消耗任何额度）                           \n┏━━━┳━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n┃ # ┃ 段落 ┃ 角色    ┃ 配什么（depicts）                    ┃ 为什么                               ┃\n┡━━━╇━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩\n│ 1 │   §1 │ concept │ 列下一长串今天要做的事               │ 核心概念段落，配图帮助读者把抽象点 … │\n│ 2 │   §3 │ concept │ 帕金森定律指的是这样一个现象：一项 … │ 核心概念段落，配图帮助读者把抽象点 … │\n│ 3 │   §6 │ concept │ 清单本身也有成本                     │ 核心概念段落，配图帮助读者把抽象点 … │\n└───┴──────┴─────────┴──────────────────────────────────────┴──────────────────────────────────────┘\n╭──────────────────────────────────────────── dry-run ─────────────────────────────────────────────╮\n│ 这是 --dry-run 预览，未渲染任何图片，也没有消耗额度。                                            │\n│ 去掉 --dry-run 即可渲染并导出整套配图；运行 duanhui init 接入真实的国产图像后端。                │\n╰──────────────────────────────────────────────────────────────────────────────────────────────────╯\n",
+        "image": "/assets/presentation/demo-0-light.svg",
+        "imageDark": "/assets/presentation/demo-0-dark.svg"
+      },
+      {
+        "label": {
+          "zh": "封面计划",
+          "en": "Cover plan"
+        },
+        "body": {
+          "zh": "从标题得到单张封面描述，尚未渲染。",
+          "en": "Create a single title-derived cover brief without rendering."
+        },
+        "command": "DUANHUI_MOCK=1 python -m duanhui.cli run examples/sample_article.md --cover --dry-run",
+        "output": "✓ 分段完成：13 段（标题：为什么你的待办清单总是越列越长？）\n✓ 封面计划：为什么你的待办清单总是越列越长 （mock 预览未消耗额度）\n╭─────────────────────────────────────── dry-run · 封面模式 ───────────────────────────────────────╮\n│ 这是 --dry-run 预览，未渲染任何图片，也没有消耗额度。                                            │\n│ 去掉 --dry-run 即可渲染封面图（cover.png）；运行 duanhui init 接入真实的国产图像后端。           │\n╰──────────────────────────────────────────────────────────────────────────────────────────────────╯\n",
+        "image": "/assets/presentation/demo-1-light.svg",
+        "imageDark": "/assets/presentation/demo-1-dark.svg"
+      }
+    ]
+  },
+  "quickstart": {
+    "title": {
+      "zh": "从完整输入开始",
+      "en": "Start with complete input"
+    },
+    "body": {
+      "zh": "需要 Python 3.12+。--dry-run 强制 mock；示例也显式设置 DUANHUI_MOCK=1，避免调用已配置的后端。",
+      "en": "Requires Python 3.12+. --dry-run forces mock behavior; the examples also set DUANHUI_MOCK=1 to avoid configured backend calls."
+    },
+    "steps": [
+      {
+        "title": {
+          "zh": "安装",
+          "en": "Install"
+        },
+        "code": "git clone https://github.com/SuperMarioYL/duanhui.git\ncd duanhui\npython3 -m venv .venv\nsource .venv/bin/activate\npython -m pip install -e ."
+      },
+      {
+        "title": {
+          "zh": "运行自带示例",
+          "en": "Run the supplied example"
+        },
+        "code": "DUANHUI_MOCK=1 python -m duanhui.cli run examples/sample_article.md --dry-run -n 3\nDUANHUI_MOCK=1 python -m duanhui.cli run examples/sample_article.md --cover --dry-run"
+      }
+    ]
+  },
+  "limitations": [
+    {
+      "zh": "mock 计划和占位图不代表真实模型的语义或图像质量。",
+      "en": "Mock plans and placeholders do not establish real-model semantic or image quality."
+    },
+    {
+      "zh": "共享风格提示不保证每张生成图完全一致。",
+      "en": "Shared style prompts do not guarantee identical visual consistency across generated images."
+    },
+    {
+      "zh": "本次未验证远程 API、图片渲染和平台发布。",
+      "en": "Remote APIs, image rendering and platform publishing were not exercised in this demo."
     }
+  ],
+  "footer": {
+    "tag": "0.5.0 · Python 3.12+ · Apache-2.0"
   }
 }

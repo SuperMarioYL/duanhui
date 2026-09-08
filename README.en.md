@@ -1,171 +1,133 @@
-<div align="right"><sub><b>English</b>&nbsp;&nbsp;⇄&nbsp;&nbsp;<a href="./README.md">简体中文</a></sub></div>
+**English** | [简体中文](README.md)
 
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./assets/hero-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="./assets/hero-light.svg">
-    <img src="./assets/hero-light.svg" width="880" alt="DuanHui — batch-illustrate a whole Chinese article in one locked native style">
-  </picture>
-</p>
+<picture>
+  <source media="(max-width: 640px) and (prefers-color-scheme: dark)" srcset="assets/presentation/hero-mobile-dark.svg">
+  <source media="(max-width: 640px)" srcset="assets/presentation/hero-mobile-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="assets/presentation/hero-dark.svg">
+  <img src="assets/presentation/hero-light.svg" width="1000" alt="Segment a Chinese article, preview illustration positions and briefs, then render with a selected backend and export placement metadata.">
+</picture>
 
-<p align="center"><sub>DuanHui is the install-and-run CLI that batch-illustrates a whole Chinese article in one locked native style — the Codex Skill illustration power, without a coding agent.</sub></p>
+**Segment a Chinese article, preview illustration positions and briefs, then render with a selected backend and export placement metadata.**
 
-<p align="center">
-  <a href="./LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue.svg" alt="Apache-2.0"></a>
-  <a href="https://github.com/SuperMarioYL/duanhui/releases"><img src="https://img.shields.io/github/v/release/SuperMarioYL/duanhui" alt="latest release"></a>
-  <a href="https://github.com/SuperMarioYL/duanhui/actions/workflows/ci.yml"><img src="https://github.com/SuperMarioYL/duanhui/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
-  <img src="https://img.shields.io/badge/python-3.12-3776AB.svg" alt="Python 3.12">
-  <img src="https://img.shields.io/badge/Codex%20Skill-install--and--run-5E5CE6.svg" alt="Codex Skill">
-  <img src="https://img.shields.io/badge/keyless-dry--run-10A37F.svg" alt="keyless dry-run">
-</p>
+`v0.5.0` · `Python 3.12+` · [Apache-2.0](LICENSE)
 
-**Paste a whole Chinese article; DuanHui reads the paragraph semantics to decide *where* to illustrate and *what each picture depicts*, then renders a batch of illustrations locked to one native white-canvas hand-drawn aesthetic — drop-in ready, with no code and no coding agent.**
+[Website](https://duanhui.lei6393.com) · [Demo record](docs/demo-results.json)
 
-The 6.3k-star hit [`helloianneo/ian-xiaohei-illustrations`](https://github.com/helloianneo/ian-xiaohei-illustrations) nailed this aesthetic — but it ships as a **Codex Skill**, so you need a coding agent to run it and ordinary 公众号 / 小红书 authors can't. Generic text-to-image, meanwhile, is single-image, English-prompt and style-drifty: it neither parses Chinese paragraph semantics to place illustrations nor locks a native look. DuanHui takes that **Skill** wave — the same one behind [`affaan-m/everything-claude-code`](https://github.com/affaan-m/everything-claude-code) — and strips the barrier: one command, zero environment, whole-article semantics, cross-image style consistency.
+## Why use it
 
-## Contents
+A multi-image article needs both visual direction and a decision about where each image belongs. DuanHui connects segmentation, placement planning and shared style prompts so authors can review the plan before a potentially paid rendering step.
 
-- [Architecture](#architecture)
-- [Why this exists](#why-this-exists)
-- [Install](#install)
-- [Quickstart](#quickstart)
-- [Usage](#usage)
-- [Demo](#demo)
-- [Configuration](#configuration)
-- [Roadmap](#roadmap)
-- [Pricing (hosted)](#pricing-hosted)
-- [License](#license)
+## Architecture
 
-<h2 id="architecture"><img src="https://api.iconify.design/tabler:topology-star-3.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> Architecture</h2>
+<picture>
+  <source media="(max-width: 640px) and (prefers-color-scheme: dark)" srcset="assets/presentation/architecture-mobile-dark.svg">
+  <source media="(max-width: 640px)" srcset="assets/presentation/architecture-mobile-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="assets/presentation/architecture-dark.svg">
+  <img src="assets/presentation/architecture-light.svg" width="1000" alt="segment.py splits and tags paragraphs. placement.py validates returned positions and briefs; style.py adds shared preambles and seeds. The image backend renders, and export.py writes images, placement_map.json and annotated.md. cover.py implements the single-cover route.">
+</picture>
 
-One Python process, no servers. Two pluggable backend families (LLM placement + image generation), each with a keyless mock — so the whole pipeline (segment → place → style-lock → render → export) runs **with zero keys**.
+segment.py splits and tags paragraphs. placement.py validates returned positions and briefs; style.py adds shared preambles and seeds. The image backend renders, and export.py writes images, placement_map.json and annotated.md. cover.py implements the single-cover route.
 
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./assets/atlas-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="./assets/atlas-light.svg">
-    <img src="./assets/atlas-light.svg" width="880" alt="Architecture: article → segment → placement plan → style-lock → render → export bundle">
-  </picture>
-</p>
+Current styles include [guaidan](styles/guaidan.yaml) and [shuimo](styles/shuimo.yaml), selected with --style. The implementation also includes --cover mode.
 
-The core primitive is the **whole-article placement plan**: a typed structure mapping Chinese paragraph semantics onto "where + what to illustrate", plus a `consistency_seed` and a shared style preamble injected into every render prompt. That seed-plus-preamble is the concrete cross-image consistency mechanism — the workflow that neither a single-call Codex Skill nor generic text-to-image ever sequences.
+## Install
 
-<h2 id="why-this-exists"><img src="https://api.iconify.design/tabler:help-circle.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> Why this exists</h2>
-
-Chinese knowledge / explainer authors routinely need 5–10 same-style hand-drawn illustrations per article, and get stuck two ways: the `ian-xiaohei`-style Skill is "for people who installed a coding agent — ordinary authors can't run it", while generic text-to-image is "single-image, hard to keep consistent". DuanHui collapses "whole article → a batch of consistent original illustrations" — half a day of per-image prompt wrangling — into one paste, and shows you a keyless preview of every decision (where each picture goes, what it depicts) *before* you spend a single credit.
-
-<h2 id="install"><img src="https://api.iconify.design/tabler:rocket.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> Install</h2>
-
-Requires Python 3.12+.
+Requires Python 3.12+. --dry-run forces mock behavior; the examples also set DUANHUI_MOCK=1 to avoid configured backend calls.
 
 ```bash
 git clone https://github.com/SuperMarioYL/duanhui.git
 cd duanhui
-pip install -e .          # or: uv pip install -e .
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e .
 ```
 
-> A PyPI release is planned; after that, `pip install duanhui` / `uv tool install duanhui` will work directly.
+## Quickstart
 
-<h2 id="quickstart"><img src="https://api.iconify.design/tabler:player-play.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> Quickstart</h2>
-
-Three commands from clone to a full illustration set — entirely keyless (mock backends, no credits spent):
+The actual article and cover dry-runs split the sample into thirteen segments, choose up to three illustration spots and create one cover plan. They do not render real illustrations or validate model aesthetics or consistency.
 
 ```bash
-duanhui run examples/sample_article.md --dry-run     # 1) preview the plan: where + what to illustrate
-duanhui run examples/sample_article.md -o out/       # 2) full run → export bundle in out/
-ls out/ && ls out/images/                             # 3) PNG batch + placement_map.json + annotated.md
+DUANHUI_MOCK=1 python -m duanhui.cli run examples/sample_article.md --dry-run -n 3
+DUANHUI_MOCK=1 python -m duanhui.cli run examples/sample_article.md --cover --dry-run
 ```
 
-<details><summary>what the placement preview looks like</summary>
+The complete article is [examples/sample_article.md](examples/sample_article.md), with commands in the [replay script](examples/presentation_demo.sh).
+
+## Usage
+
+run FILE --dry-run previews the plan, -n caps placements, --cover selects the cover path and --style chooses a style. Removing --dry-run enables rendering and export: keyless runs use mock placeholders, while valid credentials may enable paid APIs.
+
+## Recorded demo
+
+<picture>
+  <source media="(max-width: 640px) and (prefers-color-scheme: dark)" srcset="assets/presentation/process-mobile-dark.svg">
+  <source media="(max-width: 640px)" srcset="assets/presentation/process-mobile-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="assets/presentation/process-dark.svg">
+  <img src="assets/presentation/process-light.svg" width="1000" alt="The actual article and cover dry-runs split the sample into thirteen segments, choose up to three illustration spots and create one cover plan. They do not render real illustrations or validate model aesthetics or consistency.">
+</picture>
+
+### Article placement plan
+
+The thirteen-segment article yields three mock spots.
 
 ```text
-✓ segmented: 13 paragraphs (title: 为什么你的待办清单总是越列越长？)
-            placement plan · 6 spots (mock preview, no credits spent)
- # │ para │ role    │ depicts                    │ why
- 1 │  §1  │ concept │ 列下一长串今天要做的事     │ key concept — illustration helps visualise it
- 2 │  §3  │ concept │ 帕金森定律指的是这样一个…  │ key concept — illustration helps visualise it
- 4 │  §7  │ example │ 一份混着"回邮件…           │ concrete example/scene, good for a picture
- …
+$ DUANHUI_MOCK=1 python -m duanhui.cli run examples/sample_article.md --dry-run -n 3
+✓ 分段完成：13 段（标题：为什么你的待办清单总是越列越长？）
+                          配图计划 · 共 3 处（mock 预览，未消耗任何额度）
+┏━━━┳━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ # ┃ 段落 ┃ 角色    ┃ 配什么（depicts）                    ┃ 为什么                               ┃
+┡━━━╇━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ 1 │   §1 │ concept │ 列下一长串今天要做的事               │ 核心概念段落，配图帮助读者把抽象点 … │
+│ 2 │   §3 │ concept │ 帕金森定律指的是这样一个现象：一项 … │ 核心概念段落，配图帮助读者把抽象点 … │
+│ 3 │   §6 │ concept │ 清单本身也有成本                     │ 核心概念段落，配图帮助读者把抽象点 … │
+└───┴──────┴─────────┴──────────────────────────────────────┴──────────────────────────────────────┘
+╭──────────────────────────────────────────── dry-run ─────────────────────────────────────────────╮
+│ 这是 --dry-run 预览，未渲染任何图片，也没有消耗额度。                                            │
+│ 去掉 --dry-run 即可渲染并导出整套配图；运行 duanhui init 接入真实的国产图像后端。                │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
-</details>
+### Cover plan
 
-Swap in your own article. To wire up a real Chinese image backend for actual renders, run `duanhui init`.
+Create a single title-derived cover brief without rendering.
 
-<h2 id="usage"><img src="https://api.iconify.design/tabler:terminal-2.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> Usage</h2>
-
-```bash
-# placement preview (keyless — no render, no export)
-duanhui run my_article.md --dry-run
-
-# full run: segment → place → style-lock → render → export; -n caps the count
-duanhui run my_article.md -o out/ -n 6
-
-# write config interactively (pick LLM / image backends, paste keys; blank stays mock)
-duanhui init
-
-# list backends / show version
-duanhui backends
-duanhui version
+```text
+$ DUANHUI_MOCK=1 python -m duanhui.cli run examples/sample_article.md --cover --dry-run
+✓ 分段完成：13 段（标题：为什么你的待办清单总是越列越长？）
+✓ 封面计划：为什么你的待办清单总是越列越长 （mock 预览未消耗额度）
+╭─────────────────────────────────────── dry-run · 封面模式 ───────────────────────────────────────╮
+│ 这是 --dry-run 预览，未渲染任何图片，也没有消耗额度。                                            │
+│ 去掉 --dry-run 即可渲染封面图（cover.png）；运行 duanhui init 接入真实的国产图像后端。           │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
-The export folder `out/` holds three things:
+## Capabilities and integration
 
-| File | Purpose |
-|---|---|
-| `images/illustration_NN.png` | a batch of same-style white-canvas hand-drawn illustrations, named in article order |
-| `placement_map.json` | machine-readable map: each image → filename → segment idx → prompt / seed |
-| `annotated.md` | the article with `▸ 图N` markers — paste each PNG into its paragraph by eye |
+<picture>
+  <source media="(max-width: 640px) and (prefers-color-scheme: dark)" srcset="assets/presentation/integrations-mobile-dark.svg">
+  <source media="(max-width: 640px)" srcset="assets/presentation/integrations-mobile-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="assets/presentation/integrations-dark.svg">
+  <img src="assets/presentation/integrations-light.svg" width="1000" alt="placement_map records paragraph indices, prompts and seeds, while annotated.md guides placement. Shared seeds and preambles control inputs but do not by themselves guarantee a uniform visual style across model outputs.">
+</picture>
 
-More examples in [`examples/`](./examples).
+placement_map records paragraph indices, prompts and seeds, while annotated.md guides placement. Shared seeds and preambles control inputs but do not by themselves guarantee a uniform visual style across model outputs.
 
-<h2 id="demo"><img src="https://api.iconify.design/tabler:photo.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> Demo</h2>
 
-One command, from pasted article to a full illustration set (mock backend, keyless):
 
-![demo](assets/demo.gif)
+## Configuration
 
-<h2 id="configuration"><img src="https://api.iconify.design/tabler:adjustments.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> Configuration</h2>
+Settings resolve from CLI overrides, environment, YAML and defaults. init writes ~/.duanhui/config.yaml; DUANHUI_HOME changes the directory and DUANHUI_MOCK=1 forces mocks. LLM routes include deepseek/qwen/glm, and image routes include Tongyi Wanxiang, Kling, Jimeng and Seedream, using their configured credentials.
 
-`duanhui init` writes `~/.duanhui/config.yaml`. Keys are read from environment variables first; any backend left without a key runs as mock.
+## Roadmap and scope
 
-| Key | Type | Default | Meaning |
-|---|---|---|---|
-| `llm_backend` | string | `deepseek` | placement backend: `mock` / `deepseek` / `qwen` / `glm` |
-| `image_backend` | string | `tongyi-wanxiang` | render backend: `mock` / `tongyi-wanxiang` / `kling` / `jimeng` / `seedream` |
-| `max_spots` | int | auto (≈6–8 by article length) | max illustrations per article |
-| `keys.llm` / `keys.image` | string | none | optional inline keys (env vars preferred) |
+v0.5.0 includes article planning, cover mode, two style packs, rendering adapters and export bundles. More styles and hosting remain future directions; no live cloud subscription or guaranteed price is offered.
 
-Env vars: `DEEPSEEK_API_KEY` · `DASHSCOPE_API_KEY` (Tongyi / Qwen) · `ZHIPU_API_KEY` · `KLING_API_KEY` · `JIMENG_API_KEY` · `SEEDREAM_API_KEY`. Set `DUANHUI_MOCK=1` to force the keyless mock everywhere (CI uses this).
+- Mock plans and placeholders do not establish real-model semantic or image quality.
+- Shared style prompts do not guarantee identical visual consistency across generated images.
+- Remote APIs, image rendering and platform publishing were not exercised in this demo.
 
-<h2 id="roadmap"><img src="https://api.iconify.design/tabler:map-2.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> Roadmap</h2>
+[Terminal recording](assets/demo.gif) · [Recording script](docs/demo.tape)
 
-- [x] **m1 · segment + place** — paste article → role-tagged segments → keyless whole-article placement plan
-- [x] **m2 · style-lock + render** — inject the hand-drawn style + shared seed per spot → consistent batch via a pluggable image backend
-- [x] **m3 · export bundle** — images + `placement_map.json` + `annotated.md` assembled into one drop-in folder
-- [ ] cover-pair mode (gated on real author interviews)
-- [ ] multi-style pack switching (one locked aesthetic ships today)
-- [ ] hosted "paste a URL, get images in the cloud, zero environment" tier (below)
+## License
 
-<h2 id="pricing-hosted"><img src="https://api.iconify.design/tabler:credit-card.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> Pricing (hosted)</h2>
-
-The local install and CLI are **free and open source, always**. A planned paid tier targets authors who don't want to configure a Chinese image API key or set up a local environment:
-
-- **Zero-environment cloud rendering** — paste a URL / whole article, get images in the cloud, **pay-as-you-go** (≈¥0.3–0.5 per image, tracking the image backend's cost).
-- **Membership** — ≈¥29 / month with a monthly image quota + batch export + multi-style pack subscription.
-
-> The hosted tier is not built yet — it's signalled here as direction only. The v0.1 local tool is complete, free, and usable on its own.
-
-<h2 id="license"><img src="https://api.iconify.design/tabler:license.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> License</h2>
-
-Apache-2.0. Bug reports and feature ideas welcome in [Issues](https://github.com/SuperMarioYL/duanhui/issues); PRs too.
-
----
-
-## Share this
-
-```
-DuanHui — batch-illustrate a whole Chinese article in one locked native style. The Codex Skill illustration power, install-and-run, no coding agent. Paste an article, get a same-style set, export. Keyless dry-run. https://github.com/SuperMarioYL/duanhui
-```
-
-<p align="center"><sub><a href="./LICENSE">Apache-2.0</a> © 2026 SuperMarioYL</sub></p>
+[Apache-2.0](LICENSE)

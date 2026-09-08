@@ -1,0 +1,98 @@
+{
+  "name": "段绘 DuanHui",
+  "tagline": "Plan article illustrations before rendering them.",
+  "architecture": {
+    "title": "Article to placement plan and export bundle",
+    "nodes": [
+      {
+        "title": "Segmentation",
+        "detail": "Role-tagged paragraphs"
+      },
+      {
+        "title": "Placement plan",
+        "detail": "Validated ordered spots"
+      },
+      {
+        "title": "Style prompts",
+        "detail": "Shared preamble and seed"
+      },
+      {
+        "title": "Image backend",
+        "detail": "Mock or configured API"
+      },
+      {
+        "title": "Export bundle",
+        "detail": "PNG + map + annotated text"
+      }
+    ],
+    "edges": [
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        3,
+        4
+      ],
+      [
+        1,
+        4
+      ]
+    ]
+  },
+  "process": {
+    "title": "Preview article and cover plans offline",
+    "steps": [
+      {
+        "title": "Split article",
+        "detail": "13 supplied segments"
+      },
+      {
+        "title": "Limit placements",
+        "detail": "3 mock illustration spots"
+      },
+      {
+        "title": "Preview cover",
+        "detail": "One title-derived cover brief"
+      }
+    ],
+    "result": "Both dry-run plans complete without rendering images or calling paid APIs."
+  },
+  "integrations": {
+    "title": "Planning, style and export routes",
+    "items": [
+      {
+        "title": "Markdown article",
+        "detail": "Chinese paragraph input"
+      },
+      {
+        "title": "Mock planning",
+        "detail": "Offline heuristics"
+      },
+      {
+        "title": "LLM adapters",
+        "detail": "DeepSeek / Qwen / GLM"
+      },
+      {
+        "title": "Style packs",
+        "detail": "guaidan / shuimo"
+      },
+      {
+        "title": "Image adapters",
+        "detail": "Configured image APIs"
+      },
+      {
+        "title": "Export files",
+        "detail": "PNG, placement map, Markdown"
+      }
+    ]
+  }
+}

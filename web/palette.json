@@ -1,0 +1,38 @@
+{
+  "mode": "auto",
+  "id": "b1e656-76e76a-f6f6ac-fb29da5884dd",
+  "identity": "https://github.com/supermarioyl/duanhui",
+  "primary": "#b1e656",
+  "secondary": "#76e76a",
+  "highlight": "#f6f6ac",
+  "dark": {
+    "bg": "#080c0d",
+    "panel": "#101717",
+    "code": "#101713",
+    "ink": "#fdfdee",
+    "muted": "#a7b9a8",
+    "line": "#2d3c1d",
+    "primary": "#b1e656",
+    "secondary": "#76e76a",
+    "highlight": "#f6f6ac",
+    "accent": "#b1e656",
+    "buttonStart": "#638030",
+    "buttonEnd": "#44843d",
+    "buttonText": "#ffffff"
+  },
+  "light": {
+    "bg": "#fcfef9",
+    "panel": "#fbfef7",
+    "code": "#fafdf3",
+    "ink": "#202a1c",
+    "muted": "#66796a",
+    "line": "#e7f7cb",
+    "primary": "#617e2f",
+    "secondary": "#43823c",
+    "highlight": "#767653",
+    "accent": "#617e2f",
+    "buttonStart": "#638030",
+    "buttonEnd": "#44843d",
+    "buttonText": "#ffffff"
+  }
+}
