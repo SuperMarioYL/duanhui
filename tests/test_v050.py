@@ -269,7 +269,7 @@ def test_version_surfaces_agree() -> None:
     """VERSION file == __version__ == CLI --version == site.content_version ==
     CHANGELOG head. Fails on the shipped v0.4.0 tag (surfaces were 0.4.0 /
     site had no content_version), proving the bump touched every surface."""
-    expected = "0.5.0"
+    expected = "0.6.0"
 
     # VERSION file
     version_file = (REPO_ROOT / "VERSION").read_text(encoding="utf-8").strip()
@@ -293,6 +293,6 @@ def test_version_surfaces_agree() -> None:
 
     # CHANGELOG head (the newest released section header)
     changelog = (REPO_ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
-    assert f"## [{expected}]" in changelog, "CHANGELOG head missing v0.5.0 entry"
+    assert f"## [{expected}]" in changelog, "CHANGELOG head missing v0.6.0 entry"
     # the v0.5.0 entry must be above the v0.4.0 entry (newest first).
     assert changelog.index(f"## [{expected}]") < changelog.index("## [0.4.0]")

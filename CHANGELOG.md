@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-09-23
+
+### Fixed
+- **GBK/GB18030-encoded articles no longer crash `duanhui run` with a raw
+  traceback**: `_read_article` read the article as UTF-8 and guarded only
+  `OSError`, but a GBK file (the default Windows-Notepad/WPS encoding for
+  Simplified Chinese) raises `UnicodeDecodeError` — a `ValueError`, not an
+  `OSError` — so the guard missed it and the run died inside a multi-line
+  traceback. `_read_article` now retries once with the `gb18030` superset
+  codec (so the common Windows-Notepad case just works) and falls back to a
+  clean red message + exit 2 when the file is neither UTF-8 nor GB18030
+  (fix-article-decode-gbk-traceback).
+- **segmentation no longer leaks Markdown markers into `Segment.text`**:
+  blockquote lines kept their `> ` prefix, spaceless CJK ordered-list markers
+  (`1.要点` / `1、要点`) kept their numbers, and a second heading inside one
+  blank-line block (`# A` + `## B` + body) merged into its body instead of
+  becoming its own transition-tagged paragraph. `_strip_markdown` now strips
+  leading blockquote markers, the list-marker rule accepts the spaceless CJK
+  form with a `(?!\d)` guard so decimals like `1.5倍` stay intact, and
+  `_split_paragraphs` splits every heading-only line onto its own paragraph
+  (fix-segment-markdown-cleanup-gaps).
+- **hard-wrapped Chinese paragraphs no longer grow a spurious half-width
+  space at every line wrap**: `_split_paragraphs` re-joined a paragraph's
+  soft-wrapped lines with `" ".join`, inserting a mid-sentence space at every
+  wrap boundary of CJK text (the drift flowed into the LLM payload and into
+  `annotated.md`). The join is now CJK-aware: no separator when either
+  boundary character is CJK, a single space between two non-CJK words so
+  hard-wrapped English still reads correctly
+  (fix-cjk-hardwrap-join-space).
+
 ## [0.5.0] - 2026-09-07
 
 ### Fixed

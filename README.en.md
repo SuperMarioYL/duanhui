@@ -9,7 +9,7 @@
 
 **Segment a Chinese article, preview illustration positions and briefs, then render with a selected backend and export placement metadata.**
 
-`v0.5.0` · `Python 3.12+` · [Apache-2.0](LICENSE)
+`v0.6.0` · `Python 3.12+` · [Apache-2.0](LICENSE)
 
 [Website](https://duanhui.lei6393.com) · [Demo record](docs/demo-results.json)
 
@@ -120,7 +120,7 @@ Settings resolve from CLI overrides, environment, YAML and defaults. init writes
 
 ## Roadmap and scope
 
-v0.5.0 includes article planning, cover mode, two style packs, rendering adapters and export bundles. More styles and hosting remain future directions; no live cloud subscription or guaranteed price is offered.
+v0.6.0 includes article planning, cover mode, two style packs, rendering adapters and export bundles. More styles and hosting remain future directions; no live cloud subscription or guaranteed price is offered.
 
 - Mock plans and placeholders do not establish real-model semantic or image quality.
 - Shared style prompts do not guarantee identical visual consistency across generated images.

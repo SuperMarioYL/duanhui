@@ -9,7 +9,7 @@
 
 **将中文文章分段，先预览配图位置与画面描述，再选择后端渲染并导出图片映射。**
 
-`v0.5.0` · `Python 3.12+` · [Apache-2.0](LICENSE)
+`v0.6.0` · `Python 3.12+` · [Apache-2.0](LICENSE)
 
 [Website](https://duanhui.lei6393.com) · [Demo record](docs/demo-results.json)
 
@@ -120,7 +120,7 @@ placement_map 记录每张图的段落索引、prompt 和 seed，annotated.md �
 
 ## 路线图与范围
 
-v0.5.0 已包含文章计划、封面模式、两个风格包、渲染 adapter 和导出包。更丰富风格与托管服务仍是后续方向，没有已上线的云端订阅或保证价格。
+v0.6.0 已包含文章计划、封面模式、两个风格包、渲染 adapter 和导出包。更丰富风格与托管服务仍是后续方向，没有已上线的云端订阅或保证价格。
 
 - mock 计划和占位图不代表真实模型的语义或图像质量。
 - 共享风格提示不保证每张生成图完全一致。
