@@ -6,7 +6,8 @@ parsing out of scope), and the output is an ordered list of :class:`Segment`
 objects, each carrying:
 
 - ``idx``  — its position in the article (0-based)
-- ``text`` — the paragraph's visible text (Markdown heading markers stripped)
+- ``text`` — the paragraph's visible text (Markdown heading / list /
+  blockquote markers stripped)
 - ``role`` — one of ``intro | concept | example | transition``, inferred by a
   small, deterministic, dependency-free heuristic so that downstream placement
   is reproducible with **zero keys**.
@@ -133,14 +134,51 @@ _CONCEPT_MARKERS = (
 # A heading-shaped line (Markdown ``#`` or a short titley line) is a transition
 # unless it carries a concept marker.
 _MD_HEADING_RE = re.compile(r"^\s{0,3}#{1,6}\s+")
-_MD_LIST_RE = re.compile(r"^\s{0,3}([-*+]|\d+[.)])\s+")
+# Ordered markers also accept the spaceless CJK form ("1.要点" / "1、要点");
+# the ``(?!\d)`` lookahead keeps decimal numbers ("1.5倍" / "3.14") intact.
+# Bullet markers keep the required space so "-5度" is never read as a list.
+_MD_LIST_RE = re.compile(r"^\s{0,3}(?:[-*+]\s+|\d+[.)、](?!\d)\s*)")
+_MD_BLOCKQUOTE_RE = re.compile(r"^\s{0,3}(?:>\s?)+")
 
 
 def _strip_markdown(line: str) -> str:
-    """Strip the leading Markdown heading / list markers from a paragraph."""
+    """Strip the leading Markdown blockquote / heading / list markers."""
+    line = _MD_BLOCKQUOTE_RE.sub("", line)
     line = _MD_HEADING_RE.sub("", line)
     line = _MD_LIST_RE.sub("", line)
     return line.strip()
+
+
+# CJK Han ideographs, CJK punctuation (，。、…), and fullwidth forms — the
+# character classes a hard line-wrap may split a Chinese sentence across.
+_CJK_RANGES = (
+    (0x4E00, 0x9FFF),
+    (0x3000, 0x303F),
+    (0xFF00, 0xFFEF),
+)
+
+
+def _is_cjk_char(ch: str) -> bool:
+    code = ord(ch)
+    return any(lo <= code <= hi for lo, hi in _CJK_RANGES)
+
+
+def _join_soft_lines(lines: List[str]) -> str:
+    """Re-join the hard-wrapped lines of one paragraph.
+
+    A space is inserted only when both boundary characters are non-CJK (that
+    is where English words need it); CJK text joins directly so a hard-wrapped
+    Chinese sentence does not grow a spurious half-width space mid-sentence.
+    """
+    out = ""
+    for line in lines:
+        if not out:
+            out = line
+        elif _is_cjk_char(out[-1]) or (line and _is_cjk_char(line[0])):
+            out += line
+        else:
+            out += " " + line
+    return out
 
 
 def _contains_any(text: str, markers: tuple[str, ...]) -> bool:
@@ -181,7 +219,8 @@ def _split_paragraphs(article: str) -> List[tuple[str, bool]]:
 
     Paragraphs are blank-line separated. A line that is *only* a Markdown
     heading becomes its own paragraph (so it can be tagged as a transition and
-    is never merged into the prose that follows it).
+    is never merged into the prose that follows it) — including a heading that
+    appears after the first line of a block.
     """
     # Normalise newlines and collapse 3+ blank lines.
     text = article.replace("\r\n", "\n").replace("\r", "\n")
@@ -192,18 +231,23 @@ def _split_paragraphs(article: str) -> List[tuple[str, bool]]:
         lines = [ln for ln in block.split("\n") if ln.strip()]
         if not lines:
             continue
-        # A block may start with a heading line followed by body lines; emit
-        # the heading on its own and the body as a second paragraph.
-        if _MD_HEADING_RE.match(lines[0]) and len(lines) > 1:
-            out.append((_strip_markdown(lines[0]), True))
-            body = " ".join(_strip_markdown(ln) for ln in lines[1:])
-            if body:
-                out.append((body, False))
-            continue
-        was_heading = bool(_MD_HEADING_RE.match(lines[0]) and len(lines) == 1)
-        joined = " ".join(_strip_markdown(ln) for ln in lines)
-        if joined:
-            out.append((joined, was_heading))
+        # Walk the block: every heading-only line is emitted on its own, and
+        # the non-heading lines between headings form one joined paragraph.
+        body: List[str] = []
+        for line in lines:
+            if _MD_HEADING_RE.match(line):
+                if body:
+                    joined = _join_soft_lines([_strip_markdown(ln) for ln in body])
+                    if joined:
+                        out.append((joined, False))
+                    body = []
+                out.append((_strip_markdown(line), True))
+            else:
+                body.append(line)
+        if body:
+            joined = _join_soft_lines([_strip_markdown(ln) for ln in body])
+            if joined:
+                out.append((joined, False))
     return out
 
 
