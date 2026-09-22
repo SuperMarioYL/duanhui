@@ -81,6 +81,18 @@ def _read_article(path: Path) -> str:
         raise typer.Exit(code=2)
     try:
         return path.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        # GBK/GB18030 is the default Windows-Notepad/WPS encoding for Chinese
+        # authors — retry once with the superset codec before giving up. A
+        # UnicodeDecodeError is a ValueError, not an OSError, so it must be
+        # handled here or it escapes as a raw traceback.
+        try:
+            return path.read_text(encoding="gb18030")
+        except UnicodeDecodeError:
+            console.print(
+                f"[red]无法解码文件（既不是 UTF-8 也不是 GB18030 编码）：{path}[/red]"
+            )
+            raise typer.Exit(code=2)
     except OSError as exc:  # pragma: no cover - fs error
         console.print(f"[red]读取失败：{exc}[/red]")
         raise typer.Exit(code=2)
