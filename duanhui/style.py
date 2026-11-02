@@ -18,13 +18,17 @@ prompt build is observable in ``--dry-run`` exactly like the placement plan.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence
 
 import yaml
 from jinja2 import Environment
 from pydantic import BaseModel, Field
 
-from duanhui.placement import PlacementPlan, Spot
+if TYPE_CHECKING:  # pragma: no cover - type-only, breaks the import cycle
+    # Imported for annotations only: duanhui.placement imports the backends
+    # package, whose image backend imports this module, so a runtime import here
+    # made `import duanhui.style` as the first import fail.
+    from duanhui.placement import PlacementPlan, Spot
 
 __all__ = [
     "StyleLock",

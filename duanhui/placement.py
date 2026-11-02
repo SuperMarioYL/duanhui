@@ -17,12 +17,18 @@ segments and a backend, it returns a sensible, deterministic plan — and with
 
 from __future__ import annotations
 
-from typing import List, Sequence
+from typing import TYPE_CHECKING, List, Sequence
 
 from pydantic import BaseModel, Field, field_validator
 
-from duanhui.backends.llm import LLMBackend, RawSpot
 from duanhui.segment import Segment
+
+if TYPE_CHECKING:  # pragma: no cover - type-only, breaks the import cycle
+    # Imported for annotations only. A runtime import would pull in the whole
+    # backends package, whose image backend imports duanhui.style, which imports
+    # this module back — so `import duanhui.placement` as the first import used
+    # to fail with a partially-initialized-module ImportError.
+    from duanhui.backends.llm import LLMBackend, RawSpot
 
 __all__ = ["Spot", "PlacementPlan", "plan_article", "default_max_spots"]
 

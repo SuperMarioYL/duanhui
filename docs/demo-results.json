@@ -1,5 +1,5 @@
 {
-  "version": "0.5.0",
+  "version": "0.7.0",
   "scope": "Offline dry-run placement and cover planning using forced mock backends. No image rendering or paid backend call is demonstrated.",
   "inputs": [
     {

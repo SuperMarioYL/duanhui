@@ -220,7 +220,10 @@ def _split_paragraphs(article: str) -> List[tuple[str, bool]]:
     Paragraphs are blank-line separated. A line that is *only* a Markdown
     heading becomes its own paragraph (so it can be tagged as a transition and
     is never merged into the prose that follows it) — including a heading that
-    appears after the first line of a block.
+    appears after the first line of a block. A list item likewise starts a new
+    paragraph: consecutive items of a Markdown list usually have no blank line
+    between them, and joining them would fuse distinct points into one
+    unreadable (and unresolvable) sentence.
     """
     # Normalise newlines and collapse 3+ blank lines.
     text = article.replace("\r\n", "\n").replace("\r", "\n")
@@ -231,23 +234,27 @@ def _split_paragraphs(article: str) -> List[tuple[str, bool]]:
         lines = [ln for ln in block.split("\n") if ln.strip()]
         if not lines:
             continue
-        # Walk the block: every heading-only line is emitted on its own, and
-        # the non-heading lines between headings form one joined paragraph.
+        # Walk the block: every heading-only line is emitted on its own, every
+        # list item starts a new paragraph, and the remaining (soft-wrapped)
+        # lines form one joined paragraph.
         body: List[str] = []
-        for line in lines:
-            if _MD_HEADING_RE.match(line):
-                if body:
-                    joined = _join_soft_lines([_strip_markdown(ln) for ln in body])
-                    if joined:
-                        out.append((joined, False))
-                    body = []
-                out.append((_strip_markdown(line), True))
-            else:
-                body.append(line)
-        if body:
+
+        def flush() -> None:
             joined = _join_soft_lines([_strip_markdown(ln) for ln in body])
             if joined:
                 out.append((joined, False))
+            body.clear()
+
+        for line in lines:
+            if _MD_HEADING_RE.match(line):
+                flush()
+                out.append((_strip_markdown(line), True))
+            elif body and _MD_LIST_RE.match(line):
+                flush()
+                body.append(line)
+            else:
+                body.append(line)
+        flush()
     return out
 
 

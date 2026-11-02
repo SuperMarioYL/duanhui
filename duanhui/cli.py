@@ -141,6 +141,23 @@ def _build_config(dry_run: bool) -> Config:
     return Config.load(force_mock=True if dry_run else None)
 
 
+def _ensure_out_dir(out_dir: Path) -> None:
+    """Create the export directory, or exit 2 with a clean message.
+
+    The render/export stages ``mkdir`` deep inside the backends, so an ``-o``
+    that names an existing file used to escape as a raw NotADirectoryError /
+    FileExistsError traceback. The input path already degrades cleanly
+    (``_read_article`` exits 2); the output path now mirrors it.
+    """
+    try:
+        out_dir.mkdir(parents=True, exist_ok=True)
+    except OSError as exc:
+        console.print(
+            f"[red]无法创建导出目录：{out_dir}（{exc.strerror or exc}）[/red]"
+        )
+        raise typer.Exit(code=2)
+
+
 def _load_style_or_exit(pack_id: str):
     """Load a shipped style pack by id, or exit with a clear error."""
     packs = available_style_packs()
@@ -185,7 +202,7 @@ def run(
         "-n",
         min=1,
         max=12,
-        help="最多配几张图（默认按文章长度自动估算 6–8 张）。",
+        help="最多配几张图（默认按文章长度自动估算，上限 8 张）。",
     ),
     cover: bool = typer.Option(
         False,
@@ -242,6 +259,7 @@ def run(
         style_pack = _load_style_or_exit(style)
         styled = build_cover_styled_spot(cover_plan, style_pack)
         out_dir = (out or Path("out")).resolve()
+        _ensure_out_dir(out_dir)
         image_backend = make_image_backend(
             cfg.effective_image_backend(), api_key=cfg.image_api_key
         )
@@ -272,7 +290,9 @@ def run(
             f"风格包 [bold]{style_pack.pack_id}[/bold]，"
             f"consistency_seed={style_pack.consistency_seed}"
         )
-        _render_export_summary(bundle, mock_image=cfg.uses_mock_image())
+        _render_export_summary(
+            bundle, mock_image=cfg.uses_mock_image(), cover=True
+        )
         return
 
     try:
@@ -305,6 +325,7 @@ def run(
 
     # 4) render -------------------------------------------------------------
     out_dir = (out or Path("out")).resolve()
+    _ensure_out_dir(out_dir)
     images_dir = out_dir / "images"
     image_backend = make_image_backend(
         cfg.effective_image_backend(), api_key=cfg.image_api_key
@@ -339,14 +360,25 @@ def run(
     _render_export_summary(bundle, mock_image=cfg.uses_mock_image())
 
 
-def _render_export_summary(bundle, *, mock_image: bool) -> None:
-    body = (
-        f"导出目录：[bold]{bundle.out_dir}[/bold]\n"
-        f"  • images/                {bundle.image_count} 张 PNG\n"
-        f"  • placement_map.json     图 → 文件 → 段落 的机器可读映射\n"
-        f"  • annotated.md           带「▸ 图N」标记的文章，照着贴图即可\n\n"
-        "把 images/ 里的 PNG 按 annotated.md 的标记贴进公众号 / 小红书编辑器即可。"
-    )
+def _render_export_summary(bundle, *, mock_image: bool, cover: bool = False) -> None:
+    if cover:
+        # Cover mode writes cover.png at the bundle root (not under images/), so
+        # the batch report's "images/ … 张 PNG" would point at an empty folder.
+        body = (
+            f"导出目录：[bold]{bundle.out_dir}[/bold]\n"
+            f"  • {COVER_FILENAME}            {bundle.image_count} 张封面主视觉\n"
+            f"  • placement_map.json     图 → 文件 → 段落 的机器可读映射\n"
+            f"  • annotated.md           带「▸ 封面图」标注的文章\n\n"
+            f"把 {COVER_FILENAME} 贴进文章封面位置即可。"
+        )
+    else:
+        body = (
+            f"导出目录：[bold]{bundle.out_dir}[/bold]\n"
+            f"  • images/                {bundle.image_count} 张 PNG\n"
+            f"  • placement_map.json     图 → 文件 → 段落 的机器可读映射\n"
+            f"  • annotated.md           带「▸ 图N」标记的文章，照着贴图即可\n\n"
+            "把 images/ 里的 PNG 按 annotated.md 的标记贴进公众号 / 小红书编辑器即可。"
+        )
     if mock_image:
         body += (
             "\n\n[dim]当前是 mock 占位图（keyless）。运行 duanhui init 接入"
@@ -429,7 +461,7 @@ def backends() -> None:
 
 @app.command(name="list-styles")
 def list_styles() -> None:
-    """列出可选的风格包（v0.2.0：默认 guaidan，另含 shuimo 水墨）。"""
+    """列出可选的风格包（默认 guaidan 怪诞手绘，另含 shuimo 水墨）。"""
     table = Table(title="可选风格包", header_style="bold")
     table.add_column("pack_id", style="cyan", no_wrap=True)
     table.add_column("名称")

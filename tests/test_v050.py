@@ -8,30 +8,24 @@ reproducible without a real API key.
   ``RuntimeError`` and so escaped the CLI's ``except RuntimeError`` guard as an
   opaque traceback. Both backend families now wrap the POST (and the tongyi
   poll GET) so a failed request surfaces as a clear ``RuntimeError``.
-* **single-source-of-truth version test** — VERSION file == ``__version__`` ==
-  CLI ``--version`` == ``web/site.json`` content_version == CHANGELOG head, so
-  a version bump can never leave one surface echoing the old version.
+
+The version-lockstep assertion that used to live here moved to
+``tests/test_version_lockstep.py`` (one derived guard instead of one hardcoded
+copy per release file).
 """
 
 from __future__ import annotations
 
 import json
-from pathlib import Path
 from typing import Any
 
 import httpx
 import pytest
-from typer.testing import CliRunner
 
-from duanhui import __version__
 from duanhui.backends.image import KlingBackend, StyledSpot, TongyiWanxiangBackend
 from duanhui.backends.llm import DeepSeekBackend
-from duanhui.cli import app
 from duanhui.segment import Segment, SegmentRole
 
-runner = CliRunner()
-
-REPO_ROOT = Path(__file__).resolve().parent.parent
 IMG_URL = "https://cdn.example.com/img.png"
 
 
@@ -258,41 +252,3 @@ def test_llm_post_success_still_parses(monkeypatch) -> None:
     raw = DeepSeekBackend(api_key="sk-test").plan(_segs(), max_spots=4)
     assert len(raw) == 1
     assert raw[0]["depicts"] == "测试配图"
-
-
-# --------------------------------------------------------------------------- #
-# single-source-of-truth version test
-# --------------------------------------------------------------------------- #
-
-
-def test_version_surfaces_agree() -> None:
-    """VERSION file == __version__ == CLI --version == site.content_version ==
-    CHANGELOG head. Fails on the shipped v0.4.0 tag (surfaces were 0.4.0 /
-    site had no content_version), proving the bump touched every surface."""
-    expected = "0.6.0"
-
-    # VERSION file
-    version_file = (REPO_ROOT / "VERSION").read_text(encoding="utf-8").strip()
-    assert version_file == expected, f"VERSION file is {version_file!r}"
-
-    # __version__
-    assert __version__ == expected, f"__version__ is {__version__!r}"
-
-    # CLI --version
-    result = runner.invoke(app, ["version"])
-    assert result.exit_code == 0, result.stdout
-    assert expected in result.stdout, f"CLI version output: {result.stdout!r}"
-
-    # web/site.json content_version
-    site = json.loads(
-        (REPO_ROOT / "web" / "site.json").read_text(encoding="utf-8")
-    )
-    assert site.get("content_version") == expected, (
-        f"site.json content_version is {site.get('content_version')!r}"
-    )
-
-    # CHANGELOG head (the newest released section header)
-    changelog = (REPO_ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
-    assert f"## [{expected}]" in changelog, "CHANGELOG head missing v0.6.0 entry"
-    # the v0.5.0 entry must be above the v0.4.0 entry (newest first).
-    assert changelog.index(f"## [{expected}]") < changelog.index("## [0.4.0]")

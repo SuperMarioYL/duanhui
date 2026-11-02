@@ -14,14 +14,10 @@ stays green and the fixes are reproducible without a real DashScope key.
 from __future__ import annotations
 
 import pytest
-from typer.testing import CliRunner
 
-from duanhui import __version__
 from duanhui.backends.image import StyledSpot, TongyiWanxiangBackend
-from duanhui.cli import app
 from duanhui.config import MAX_SPOTS_MAX, MAX_SPOTS_MIN, Config
 
-runner = CliRunner()
 
 
 def _spot() -> StyledSpot:
@@ -249,18 +245,3 @@ def test_config_max_spots_in_range_unchanged(tmp_path, monkeypatch) -> None:
     cfg_path.write_text("max_spots: 5\n", encoding="utf-8")
     cfg = Config.load(path=cfg_path)
     assert cfg.max_spots == 5
-
-
-# --------------------------------------------------------------------------- #
-# version bump
-# --------------------------------------------------------------------------- #
-
-
-def test_version_is_030() -> None:
-    assert __version__ == "0.6.0"
-
-
-def test_cli_version_reports_030() -> None:
-    result = runner.invoke(app, ["version"])
-    assert result.exit_code == 0, result.stdout
-    assert "0.6.0" in result.stdout

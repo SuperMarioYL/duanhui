@@ -7,6 +7,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-03
+
+### Fixed
+- **`duanhui.placement` and `duanhui.style` now import cleanly on their own**:
+  each module reached the other through `duanhui.backends`, so importing either
+  as the first import of a fresh interpreter died with
+  `ImportError: cannot import name '…' from partially initialized module …
+  (most likely due to a circular import)`. The suite never noticed because
+  pytest's first test imports `duanhui.cli`, which warms the module graph. Both
+  imports were only used in type annotations (`from __future__ import
+  annotations` is already in force), so they now live under `TYPE_CHECKING` and
+  the cycle is gone (fix-public-module-import-cycle).
+- **Markdown list items are no longer fused into one garbled paragraph**:
+  consecutive list items in a blank-line block were re-joined into a single
+  `Segment.text` (`第一个要点…第二个要点…第三个要点…` with no separator at all),
+  which flowed into the LLM placement payload and into `annotated.md`'s
+  reproduction of the article. `_split_paragraphs` now starts a new paragraph at
+  every list-item line while indented continuation lines still join their item;
+  `1.5倍` / `3.14` and blank-line-separated lists are unchanged
+  (fix-list-block-paragraph-merge).
+- **cover mode's export report names the file it actually wrote**: the shared
+  summary claimed `images/ 1 张 PNG` and told the author to paste PNGs from
+  `images/`, but `--cover` writes `cover.png` at the bundle root and leaves
+  `images/` empty. The cover branch now reports `cover.png` and the paste
+  instruction points at the article cover position (fix-cover-export-summary).
+- **an `-o` that names an existing file exits 2 instead of printing a
+  traceback**: the `mkdir` deep inside the render/export path surfaced
+  `NotADirectoryError` / `FileExistsError` as a raw rich traceback + exit 1. A
+  new `_ensure_out_dir` guard creates the export folder up front and prints the
+  same clean red message + exit 2 the CLI already uses for a bad article path
+  (fix-out-dir-traceback).
+
+### Changed
+- **one derived version-lockstep guard replaces four hardcoded copies**: the
+  duplicated version tests in `tests/test_v030.py` … `tests/test_v060.py` were
+  replaced by `tests/test_version_lockstep.py`, which derives the expected
+  version from `VERSION` and asserts `__version__`, the CLI, `pyproject.toml`,
+  both README locales, all three `web/site.json` version strings,
+  `docs/demo-results.json`, and the CHANGELOG head + link references agree.
+  `docs/demo-results.json` had been stuck at `0.5.0`, the CHANGELOG had no link
+  refs for 0.4.0–0.6.0, and two user-visible CLI help strings were stale
+  (`list-styles` said "v0.2.0"; `--max-spots` claimed a fixed 6–8 default) — all
+  corrected (fix-version-and-doc-surface-lockstep).
+
 ## [0.6.0] - 2026-09-23
 
 ### Fixed
@@ -153,7 +197,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `duanhui` CLI with `run`, `init`, and `--dry-run`, a keyless end-to-end test
   suite, and a bilingual (简体中文 / English) README.
 
-[Unreleased]: https://github.com/SuperMarioYL/duanhui/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/SuperMarioYL/duanhui/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/SuperMarioYL/duanhui/releases/tag/v0.7.0
+[0.6.0]: https://github.com/SuperMarioYL/duanhui/releases/tag/v0.6.0
+[0.5.0]: https://github.com/SuperMarioYL/duanhui/releases/tag/v0.5.0
+[0.4.0]: https://github.com/SuperMarioYL/duanhui/releases/tag/v0.4.0
 [0.3.0]: https://github.com/SuperMarioYL/duanhui/releases/tag/v0.3.0
 [0.2.0]: https://github.com/SuperMarioYL/duanhui/releases/tag/v0.2.0
 [0.1.0]: https://github.com/SuperMarioYL/duanhui/releases/tag/v0.1.0

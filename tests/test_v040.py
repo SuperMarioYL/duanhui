@@ -20,9 +20,7 @@ from typing import Any
 
 import httpx
 import pytest
-from typer.testing import CliRunner
 
-from duanhui import __version__
 from duanhui.backends.image import (
     KlingBackend,
     MockImageBackend,
@@ -30,10 +28,7 @@ from duanhui.backends.image import (
     TongyiWanxiangBackend,
 )
 from duanhui.backends.llm import DeepSeekBackend
-from duanhui.cli import app
 from duanhui.segment import Segment, SegmentRole
-
-runner = CliRunner()
 
 IMG_URL = "https://cdn.example.com/img.png"
 
@@ -264,18 +259,3 @@ def test_mock_canvas_still_guards_zero() -> None:
     # the mock's existing guard still produces a valid canvas (consistency
     # between the two backend families).
     assert MockImageBackend()._canvas(_spot("0:9")) == (480, 270)
-
-
-# --------------------------------------------------------------------------- #
-# version bump
-# --------------------------------------------------------------------------- #
-
-
-def test_version_is_040() -> None:
-    assert __version__ == "0.6.0"
-
-
-def test_cli_version_reports_040() -> None:
-    result = runner.invoke(app, ["version"])
-    assert result.exit_code == 0, result.stdout
-    assert "0.6.0" in result.stdout

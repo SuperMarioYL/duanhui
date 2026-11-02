@@ -15,24 +15,20 @@ without a real API key.
   into its body instead of becoming its own paragraph.
 * **fix-cjk-hardwrap-join-space** — hard-wrapped CJK lines got a spurious
   half-width space at every wrap boundary from the ``" ".join`` re-joining.
-* **single-source-of-truth version test** — VERSION file == ``__version__``
-  == CLI version == ``web/site.json`` content_version == CHANGELOG head.
+
+The version-lockstep assertion that used to live here moved to
+``tests/test_version_lockstep.py`` (one derived guard instead of one hardcoded
+copy per release file).
 """
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
-
 from typer.testing import CliRunner
 
-from duanhui import __version__
 from duanhui.cli import _read_article, app
 from duanhui.segment import segment_article
 
 runner = CliRunner()
-
-REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
 # --------------------------------------------------------------------------- #
@@ -141,41 +137,3 @@ def test_hardwrapped_english_lines_keep_space() -> None:
     art = "some wrapped english words\ncontinue on the next line here\n"
     segs = segment_article(art)
     assert segs[0].text == "some wrapped english words continue on the next line here"
-
-
-# --------------------------------------------------------------------------- #
-# single-source-of-truth version test
-# --------------------------------------------------------------------------- #
-
-
-def test_version_surfaces_agree() -> None:
-    """VERSION file == __version__ == CLI version output == site
-    content_version == CHANGELOG head, so a version bump can never leave one
-    surface echoing the old version."""
-    expected = "0.6.0"
-
-    # VERSION file
-    version_file = (REPO_ROOT / "VERSION").read_text(encoding="utf-8").strip()
-    assert version_file == expected, f"VERSION file is {version_file!r}"
-
-    # __version__
-    assert __version__ == expected, f"__version__ is {__version__!r}"
-
-    # CLI version command
-    result = runner.invoke(app, ["version"])
-    assert result.exit_code == 0, result.stdout
-    assert expected in result.stdout, f"CLI version output: {result.stdout!r}"
-
-    # web/site.json content_version
-    site = json.loads(
-        (REPO_ROOT / "web" / "site.json").read_text(encoding="utf-8")
-    )
-    assert site.get("content_version") == expected, (
-        f"site.json content_version is {site.get('content_version')!r}"
-    )
-
-    # CHANGELOG head (the newest released section header)
-    changelog = (REPO_ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
-    assert f"## [{expected}]" in changelog, "CHANGELOG head missing v0.6.0 entry"
-    # the v0.6.0 entry must be above the v0.5.0 entry (newest first).
-    assert changelog.index(f"## [{expected}]") < changelog.index("## [0.5.0]")
